@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rga-soundimage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* prevent dark/yellow autofill glow */
+      input:-webkit-autofill,
+      textarea:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+        -webkit-text-fill-color: #0f172a !important; /* slate-900 */
+        caret-color: #0f172a !important;
+      }
+      </style>      
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

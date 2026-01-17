@@ -1,0 +1,26 @@
+/* REMOVE Vite default styles – use clean minimal base */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background-color: #ffffff;  /* white background for full-width layout */
+  color: #0f172a; /* slate-900 */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Remove Vite default body flex centering */
+body {
+  display: block; /* critical fix */
+}
+
+/* Links - remove default violet color */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

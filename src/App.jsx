@@ -1,0 +1,530 @@
+import React from "react";
+import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Check, Phone, Mail, MapPin, ChevronRight, Play, Building2, AudioLines, Layers } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileText } from "lucide-react";
+
+// =============================
+// Brand & Site Config
+// =============================
+const BRAND = {
+  name: "RGA Sound Image",
+  tagline: "Designing sound that speaks to every space.",
+  heritage: "Elevating audio experiences since 1995",
+  description:
+    "RGA Sound Image is a pioneer in Dolby-certified sound solutions across Andhra Pradesh and Telangana. We specialize in audio-visual consultation and turnkey installations for cinemas, commercial environments, and professional spaces. As authorized distributors of Stonewater Audio and partners with renowned global brands like JBL and Yamaha, we craft immersive sound experiences tailored to each client’s needs.",
+  primary: "#0B1C53", // deep navy
+  secondary: "#0F2A7E"//, // accent
+  //whatsapp: "https://wa.me/" // add your number like 91XXXXXXXXXX
+};
+
+// =============================
+// Logo (uses external image) – with slight left shift and 1:3 ratio
+// =============================
+const Logo = () => (
+  <div className="-ml-4">{/* shift logo slightly left */}
+    <img
+      src="https://i.postimg.cc/RhzYmvfw/RGA-logo-No-background.png"
+      alt="RGA Sound Image logo"
+      className="h-30 w-10 object-contain select-none"
+      draggable={false}
+    />
+  </div>
+);
+
+// =============================
+// Layout
+// =============================
+const Shell = ({ children }) => {
+  const location = useLocation();
+  return (
+    <div className="min-h-screen flex flex-col bg-white text-slate-900" style={{"--brand": BRAND.primary}}>
+      <header className="sticky top-0 z-30 border-b" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 text-slate-900 hover:text-slate-900 visited:text-slate-900">
+          <Logo />
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold tracking-tight">{BRAND.name}</span>
+              <span className="text-[0.7rem] text-slate-500 tracking-[0.1em] uppercase">{BRAND.heritage}</span>
+            </div>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            <NavLink to="/" label="Home" current={location.pathname === "/"} />
+            <NavLink to="/about" label="About" current={location.pathname.startsWith("/about")} />
+            <NavLink to="/products" label="Products" current={location.pathname.startsWith("/products")} />
+            <NavLink to="/projects" label="Projects" current={location.pathname.startsWith("/projects")} />
+            <NavLink to="/contact" label="Contact" current={location.pathname.startsWith("/contact")} />
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+};
+
+const NavLink = ({ to, label, current }) => (
+  <Link to={to} className={`transition hover:text-slate-900 ${current ? "text-slate-900" : "text-slate-600"}`}>{label}</Link>
+);
+
+const Footer = () => (
+  <><footer className="border-t mt-16">
+  {/* Top footer row */}
+  <div className="w-full px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+
+    {/* LEFT — Quick Links */}
+    <div>
+      <p className="font-medium mb-3">Quick Links</p>
+      <ul className="space-y-2 text-sm text-slate-600">
+        <li>
+          <Link to="/about" className="hover:text-slate-900">About</Link>
+        </li>
+        <li>
+          <Link to="/products" className="hover:text-slate-900">Products</Link>
+        </li>
+        <li>
+          <Link to="/projects" className="hover:text-slate-900">Projects</Link>
+        </li>
+        <li>
+          <Link to="/contact" className="hover:text-slate-900">Contact</Link>
+        </li>
+      </ul>
+    </div>
+
+    {/* CENTER — Logo */}
+    <div className="flex justify-center">
+  <div className="scale-150">
+    <Logo />
+  </div>
+</div>
+
+    {/* RIGHT — Contact */}
+    <div className="text-sm text-slate-600 space-y-2 md:text-right">
+      <p className="font-medium mb-3">Contact</p>
+      <p className="flex items-center gap-2 md:justify-end">
+        <Phone size={16} /> +91 98490 01016; +91 79810 35920
+      </p>
+      <p className="flex items-center gap-2 md:justify-end">
+        <Mail size={16} /> contact@rgasoundimage.com
+      </p>
+      <p className="flex items-center gap-2 md:justify-end">
+        <MapPin size={16} /> Hyderabad, Telangana, India
+      </p>
+    </div>
+  </div>
+
+  {/* Bottom footer row */}
+  <div className="text-center text-xs text-slate-500 pb-8">
+    © {new Date().getFullYear()} RGA Sound Image. All rights reserved.
+  </div>
+</footer>
+</>
+);
+
+// =============================
+// Pages
+// =============================
+const Home = () => (
+  <div>
+    {/* Hero Section */}
+    <section className="relative overflow-hidden">
+      {/* Fixed background gradient (now behind the content) */}
+      <div
+        className="absolute inset-0 -z-10 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(120% 80% at 30% 0%, #f1f5f9 0%, #ffffff 60%)',
+        }}
+      />
+
+      {/* Main hero content */}
+      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24">
+        <div className="grid grid-cols-1">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <span className="inline-flex items-center gap-2 text-xs font-medium bg-slate-100 rounded-full px-3 py-1 w-fit -translate-y-8">
+              <AudioLines size={14} /> Dolby-Certified AV Integrators
+            </span>
+
+            <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+              Immersive audio-visual solutions for cinemas, commercial & professional spaces
+            </h1>
+
+            <p className="text-slate-600">
+              From acoustic design to commissioning, we deliver turnkey projects that meet Dolby standards and brand expectations. Authorized distributor of Stonewater Audio; solution partners with JBL and Yamaha.
+            </p>
+
+            <div className="flex flex-wrap gap-3 translate-y-12">
+              <Link to="/products">
+                <Button className="rounded-2xl">Explore Products</Button>
+              </Link>
+              <Link to="/projects">
+                <Button variant="outline" className="rounded-2xl">
+                  See Projects
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+      <div className="grid md:grid-cols-3 gap-6">
+        <ValueCard icon={<Building2 />} title="Turnkey Execution" text="Design, supply, installation, calibration, and AMC under one roof."/>
+        <ValueCard icon={<Layers />} title="Certified Standards" text="Dolby specifications and best-practice acoustics for reliable performance."/>
+        <ValueCard icon={<AudioLines />} title="Trusted Brands" text="Stonewater Audio, JBL Professional, Yamaha Commercial Audio, and more."/>
+      </div>
+    </section>
+
+    <section className="bg-slate-50">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex items-end justify-between mb-6">
+          <h2 className="text-2xl font-semibold">Featured Projects</h2>
+          <Link to="/projects" className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">View all <ChevronRight size={16}/></Link>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {title:"Dolby Cinema – Vijayawada", tag:"Cinema", desc:"7.1 system with acoustic treatment, calibrated to Dolby spec."},
+            {title:"Corporate Boardroom – Hyderabad", tag:"Commercial", desc:"UCC, beamforming mics, dual displays, DSP-tuned for clarity."},
+            {title:"Multipurpose Hall – Telangana", tag:"Pro AV", desc:"Stage reinforcement with sub-satellite array and matrix routing."}
+          ].map((p, i)=> <ProjectCard key={i} {...p} />)}
+        </div>
+      </div>
+    </section>
+
+    <CtaBand />
+  </div>
+);
+
+const About = () => (
+  <section className="w-full px-4 sm:px-6 lg:px-8 py-16 space-y-8">
+    <h1 className="text-3xl md:text-4xl font-semibold">About {BRAND.name}</h1>
+    <p className="text-slate-700 leading-7">{BRAND.description}</p>
+    <div className="grid md:grid-cols-3 gap-6">
+      <Stat number="100+" label="Projects Delivered"/>
+      <Stat number="30+ yrs" label="Domain Experience"/>
+      <Stat number="AP & TS" label="Regional Coverage"/>
+    </div>
+    <div className="grid md:grid-cols-2 gap-6 mt-6">
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader><CardTitle>What we do</CardTitle></CardHeader>
+        <CardContent className="text-slate-700 space-y-2">
+          <li>Consultation & acoustic design</li>
+          <li>Supply, installation & integration</li>
+          <li>Calibration (Dolby/Room EQ) & commissioning</li>
+          <li>Annual maintenance contracts (AMC)</li>
+        </CardContent>
+      </Card>
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader><CardTitle>Verticals</CardTitle></CardHeader>
+        <CardContent className="text-slate-700 space-y-2">
+          <li>Cinema & preview theatres</li>
+          <li>Corporate & education</li>
+          <li>Hospitality & retail</li>
+          <li>Houses of worship & public spaces</li>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
+);
+
+const Products = () => (
+  <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+    <div className="mb-10 max-w-4xl space-y-5">
+  <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>
+
+  <p className="text-slate-700">
+    Curated portfolio from Stonewater Audio (authorized distributor), JBL Professional,
+    Yamaha Commercial Audio, and more.
+  </p>
+
+  {/* Catalogs */}
+  <div className="space-y-3">
+    <p className="font-medium text-slate-900">Our Catalogs:</p>
+
+    <div className="flex flex-wrap gap-4">
+      {/* Cinema Catalog */}
+      <CatalogItem
+        title="Cinema Systems"
+        href="/RGA-Cinema-Catalog.pdf"
+        size="PDF · 12 MB"
+      />
+
+      {/* Commercial Catalog */}
+      <CatalogItem
+        title="Commercial AV"
+        href="/RGA_Speaker_catalogue.pdf"
+        size="PDF · 3 MB"
+      />
+    </div>
+  </div>
+
+  {/* Get in touch line */}
+  <p className="text-slate-600 text-sm">
+    Get in touch for detailed datasheets and design support.
+  </p>
+</div>
+
+
+    <div className="grid md:grid-cols-3 gap-6">
+      <ProductCard
+        title="Cinema Systems"
+        items={["Screen channels", "Surrounds", "Subwoofers", "Processing & amps"]}
+      />
+      <ProductCard
+        title="Commercial Speakers"
+        items={["Ceiling & pendant", "Surface-mount", "Column arrays", "Sub-satellite kits"]}
+      />
+      <ProductCard
+        title="Electronics & Control"
+        items={["DSP & matrices", "Power amplifiers", "Mixers", "AV over IP"]}
+      />
+      <ProductCard
+        title="Microphones & UCC"
+        items={["Beamforming mics", "Wireless systems", "Conferencing", "Lecture capture"]}
+      />
+      <ProductCard
+        title="Displays & Projection"
+        items={["LED walls", "Commercial displays", "Projectors", "Screens"]}
+      />
+      <ProductCard
+        title="Cables & Accessories"
+        items={["Audio cabling", "Speaker hardware", "Racks & power", "Mounts"]}
+      />
+    </div>
+    <div className="mt-10">
+      <Card className="rounded-2xl">
+        <CardContent className="p-6 flex flex-wrap items-center gap-4 text-sm text-slate-700">
+          <span className="font-medium">Featured brands:</span>
+          <Badge>Stonewater Audio</Badge>
+          <Badge>JBL Professional</Badge>
+          <Badge>Yamaha</Badge>
+          <Badge>Shure</Badge>
+          <Badge>Extron</Badge>
+          <Badge>QSC</Badge>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
+);
+
+const CatalogItem = ({ title, href, size }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    title="Download catalog"
+    className="group inline-flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50 transition"
+  >
+    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition">
+      <FileText size={18} className="text-slate-700" />
+    </div>
+
+    <div className="leading-tight">
+      <p className="text-sm font-medium text-slate-900">{title}</p>
+      <p className="text-xs text-slate-500">{size}</p>
+    </div>
+  </a>
+);
+
+const Projects = () => (
+  <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+    <div className="mb-8 max-w-4xl">
+      <h1 className="text-3xl md:text-4xl font-semibold mb-2">Projects</h1>
+      <p className="text-slate-700">
+        Selected turnkey deployments delivered by our team. Each project includes consultation,
+        integration, and on-site calibration.
+      </p>
+    </div>
+    <div className="grid md:grid-cols-3 gap-6">
+      {[
+        {
+          title: "Dolby Cinema – Vijayawada",
+          tag: "Cinema",
+          desc: "7.1 system with acoustic treatment & subwoofer alignment.",
+        },
+        {
+          title: "Multiplex – Hyderabad",
+          tag: "Cinema",
+          desc: "Chainwide standards rollout and commissioning support.",
+        },
+        {
+          title: "HQ Boardroom – Hyderabad",
+          tag: "Commercial",
+          desc: "UCC with DSP, beamforming mic, dual 98” displays.",
+        },
+        {
+          title: "Auditorium – Telangana",
+          tag: "Pro AV",
+          desc: "Sub-satellite arrays for speech & music, matrix routing.",
+        },
+        {
+          title: "Retail Flagship – Vizag",
+          tag: "Retail",
+          desc: "Distributed audio with zoning and app-based control.",
+        },
+        {
+          title: "Training Rooms – Guntur",
+          tag: "Education",
+          desc: "Ceiling speakers, wireless mics, lecture capture.",
+        },
+      ].map((p, i) => (
+        <ProjectCard key={i} {...p} />
+      ))}
+    </div>
+  </section>
+);
+
+
+const Contact = () => (
+  <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+    <h1 className="text-3xl md:text-4xl font-semibold mb-6">Contact</h1>
+    <div className="grid lg:grid-cols-2 gap-8">
+      <Card className="rounded-2xl">
+        <CardHeader><CardTitle>Send us a message</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <Input placeholder="Your name"/>
+          <Input placeholder="Email" type="email"/>
+          <Input placeholder="Phone"/>
+          <Textarea placeholder="Tell us about your project" rows={5}/>
+          <Button className="rounded-2xl">Submit</Button>
+          <p className="text-xs text-slate-500">This is a static form. Hook it to your email/CRM (Formspree, Airtable, etc.).</p>
+        </CardContent>
+      </Card>
+      <Card className="rounded-2xl">
+        <CardHeader><CardTitle>Reach us</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-slate-700">
+          <p className="flex items-center gap-2"><Phone size={16}/> +917981035920; +919849001016</p>
+          <p className="flex items-center gap-2"><Mail size={16}/> contact@rgasoundimage.com</p>
+          <p className="flex items-center gap-2"><MapPin size={16}/> Hyderabad, Telangana, India</p>
+          <div className="rounded-xl overflow-hidden">
+            <iframe title="map" className="w-full h-60" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2459.8367227786457!2d78.49255064261227!3d17.42343644082144!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb99f5a9129611%3A0x361ae86bd1feb2aa!2sA%2C%20GN160%2C%206-6-431%2C%20behind%20Necklace%20Pride%2C%20Gandhi%20Nagar%2C%20Bhoiguda%2C%20Secunderabad%2C%20Telangana%20500080!5e0!3m2!1sen!2sin!4v1762631746829!5m2!1sen!2sin"></iframe>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
+);
+
+// =============================
+// Reusable bits
+// =============================
+const ValueCard = ({ icon, title, text }) => (
+  <Card className="rounded-2xl shadow-sm">
+    <CardContent className="p-6">
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-xl bg-slate-100">{icon}</div>
+        <div>
+          <p className="font-medium">{title}</p>
+          <p className="text-sm text-slate-600 mt-1">{text}</p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ProductCard = ({ title, items }) => (
+  <Card className="rounded-2xl shadow-sm">
+    <CardHeader className="pb-2"><CardTitle>{title}</CardTitle></CardHeader>
+    <CardContent className="text-sm text-slate-700">
+      <ul className="space-y-1">
+        {items.map((it, i)=> (
+          <li key={i} className="flex items-start gap-2"><Check size={16} className="mt-0.5"/>{it}</li>
+        ))}
+      </ul>
+    </CardContent>
+  </Card>
+);
+
+const Badge = ({ children }) => (
+  <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs">{children}</span>
+);
+
+const ProjectCard = ({ title, tag, desc }) => (
+  <Card className="rounded-2xl overflow-hidden hover:shadow-md transition">
+    <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+      <Play />
+    </div>
+    <CardContent className="p-5 space-y-1">
+      <p className="text-xs uppercase tracking-wide text-slate-500">{tag}</p>
+      <p className="font-medium">{title}</p>
+      <p className="text-sm text-slate-600">{desc}</p>
+    </CardContent>
+  </Card>
+);
+
+const Stat = ({ number, label }) => (
+  <div className="rounded-2xl bg-slate-50 p-6 text-center">
+    <div className="text-3xl font-semibold">{number}</div>
+    <div className="text-slate-600 text-sm mt-1">{label}</div>
+  </div>
+);
+
+const CtaBand = () => (
+  <section className="py-16">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
+      <Card className="rounded-2xl">
+        <CardContent className="p-8 md:p-10 grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <h3 className="text-2xl font-semibold">Ready to design your space?</h3>
+            <p className="text-slate-600 mt-2">Tell us about your cinema, boardroom, auditorium, or venue. We’ll recommend the right system and deliver end-to-end.</p>
+          </div>
+          <div className="flex gap-3 md:justify-end">
+            <Link to="/contact"><Button className="rounded-2xl">Get a Consultation</Button></Link>
+            <a href={BRAND.whatsapp} target="_blank" rel="noreferrer"><Button variant="outline" className="rounded-2xl">Chat on WhatsApp</Button></a>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
+);
+
+const HeroMockup = () => (
+  <div className="relative rounded-3xl shadow-lg overflow-hidden">
+    <div className="aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200" />
+    <div className="absolute inset-x-6 bottom-6 bg-white rounded-2xl shadow p-4 grid gap-3">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-slate-100"><AudioLines size={18}/></div>
+        <div className="text-sm">
+          <p className="font-medium">Dolby-grade system design</p>
+          <p className="text-slate-600">Accurate coverage, level, and voicing.</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-slate-100"><Layers size={18}/></div>
+        <div className="text-sm">
+          <p className="font-medium">Turnkey integration</p>
+          <p className="text-slate-600">From drawings to commissioning.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// =============================
+// App Entrypoint
+// =============================
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Shell>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </Shell>
+    </BrowserRouter>
+  );
+}
