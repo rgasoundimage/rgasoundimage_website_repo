@@ -30,7 +30,7 @@ const Logo = () => (
     <img
       src="https://i.postimg.cc/RhzYmvfw/RGA-logo-No-background.png"
       alt="RGA Sound Image logo"
-      className="h-30 w-10 object-contain select-none"
+      className="h-32 w-11 object-contain select-none"
       draggable={false}
     />
   </div>
@@ -44,11 +44,11 @@ const Shell = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900" style={{"--brand": BRAND.primary}}>
       <header className="sticky top-0 z-30 border-b" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
-        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 text-slate-900 hover:text-slate-900 visited:text-slate-900">
           <Logo />
             <div className="flex flex-col leading-tight">
-              <span className="font-semibold tracking-tight">{BRAND.name}</span>
+              <span className="font-semibold text-[1.5rem] tracking-tight">{BRAND.name}</span>
               <span className="text-[0.7rem] text-slate-500 tracking-[0.1em] uppercase">{BRAND.heritage}</span>
             </div>
           </Link>
