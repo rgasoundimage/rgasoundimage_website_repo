@@ -13,7 +13,7 @@ import { FileText } from "lucide-react";
 // =============================
 const BRAND = {
   name: "RGA Sound Image",
-  tagline: "Designing sound that speaks to every space.",
+  tagline: "Designing sound that speaks to every space. Since 1995.",
   heritage: "Elevating audio experiences since 1995",
   description:
     "RGA Sound Image is a pioneer in Dolby-certified sound solutions across Andhra Pradesh and Telangana. We specialize in audio-visual consultation and turnkey installations for cinemas, commercial environments, and professional spaces. As authorized distributors of Stonewater Audio and partners with renowned global brands like JBL and Yamaha, we craft immersive sound experiences tailored to each client’s needs.",
