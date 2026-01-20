@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Phone, Mail, MapPin, ChevronRight, Play, Building2, AudioLines, Layers } from "lucide-react";
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 // =============================
 // Brand & Site Config
@@ -41,6 +43,7 @@ const Logo = () => (
 // =============================
 const Shell = ({ children }) => {
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900" style={{"--brand": BRAND.primary}}>
       <header className="sticky top-0 z-30 border-b" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
@@ -59,7 +62,27 @@ const Shell = ({ children }) => {
             <NavLink to="/projects" label="Projects" current={location.pathname.startsWith("/projects")} />
             <NavLink to="/contact" label="Contact" current={location.pathname.startsWith("/contact")} />
           </nav>
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden p-2 rounded-lg hover:bg-slate-100"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Open menu"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
+        {/* Mobile menu dropdown */}
+        {mobileOpen && (
+          <div className="md:hidden border-t bg-white">
+            <nav className="px-4 py-6 flex flex-col gap-4 text-sm items-center text-center">
+              <Link to="/" onClick={() => setMobileOpen(false)}>Home</Link>
+              <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
+              <Link to="/products" onClick={() => setMobileOpen(false)}>Products</Link>
+              <Link to="/projects" onClick={() => setMobileOpen(false)}>Projects</Link>
+              <Link to="/contact" onClick={() => setMobileOpen(false)}>Contact</Link>
+            </nav>
+          </div>
+        )}
       </header>
       <main className="flex-1">{children}</main>
       <Footer />
