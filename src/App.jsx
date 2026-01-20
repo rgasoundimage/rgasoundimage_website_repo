@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useEffect } from "react";
+
 
 // =============================
 // Brand & Site Config
@@ -151,7 +153,14 @@ const Footer = () => (
 // =============================
 // Pages
 // =============================
-const Home = () => (
+const Home = () => {
+
+  useEffect(() => {
+    document.title =
+      "RGA Sound Image | Professional Cinema & Commercial Audio Solutions ";
+  }, []);
+
+  return (
   <div>
     {/* Hero Section */}
     <section className="relative overflow-hidden">
@@ -227,8 +236,15 @@ const Home = () => (
     <CtaBand />
   </div>
 );
+};
 
-const About = () => (
+const About = () => {
+  useEffect(() => {
+    document.title =
+      "About RGA Sound Image | Professional Audio Experts in India";
+  }, []);
+
+  return (
   <section className="w-full px-4 sm:px-6 lg:px-8 py-16 space-y-8">
     <h1 className="text-3xl md:text-4xl font-semibold">About {BRAND.name}</h1>
     <p className="text-slate-700 leading-7">{BRAND.description}</p>
@@ -259,8 +275,17 @@ const About = () => (
     </div>
   </section>
 );
+};
 
-const Products = () => (
+
+const Products = () => {
+
+  useEffect(() => {
+    document.title =
+      "Cinema, Commercial & Professional Audio Products | RGA Sound Image";
+  }, []);
+
+  return (
   <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
     <div className="mb-10 max-w-4xl space-y-5">
   <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>
@@ -338,7 +363,8 @@ const Products = () => (
       </Card>
     </div>
   </section>
-);
+ );
+};
 
 const CatalogItem = ({ title, href, size }) => (
   <a
@@ -359,7 +385,14 @@ const CatalogItem = ({ title, href, size }) => (
   </a>
 );
 
-const Projects = () => (
+const Projects = () => {
+
+  useEffect(() => {
+    document.title =
+      " Professional Audio Installation Projects | RGA Sound Image";
+  }, []);
+
+  return (
   <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
     <div className="mb-8 max-w-4xl">
       <h1 className="text-3xl md:text-4xl font-semibold mb-2">Projects</h1>
@@ -406,9 +439,17 @@ const Projects = () => (
     </div>
   </section>
 );
+};
 
 
-const Contact = () => (
+const Contact = () => {
+
+  useEffect(() => {
+    document.title =
+      "Contact RGA Sound Image | AV Solutions India";
+  }, []);
+
+  return (
   <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
     <h1 className="text-3xl md:text-4xl font-semibold mb-6">Contact</h1>
     <div className="grid lg:grid-cols-2 gap-8">
@@ -437,6 +478,7 @@ const Contact = () => (
     </div>
   </section>
 );
+};
 
 // =============================
 // Reusable bits
@@ -537,7 +579,8 @@ const HeroMockup = () => (
 // App Entrypoint
 // =============================
 export default function App() {
-  return (
+
+  return(
     <BrowserRouter>
       <Shell>
         <Routes>
