@@ -52,7 +52,7 @@ const Shell = ({ children }) => {
           <Logo />
             <div className="flex flex-col leading-tight">
               <span className="font-semibold text-[1.5rem] tracking-tight">{BRAND.name}</span>
-              <span className="text-[0.7rem] text-slate-500 tracking-[0.1em] uppercase">{BRAND.heritage}</span>
+              <span className="text-[0.65rem] text-slate-500 tracking-[0.1em] uppercase">{BRAND.heritage}</span>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
