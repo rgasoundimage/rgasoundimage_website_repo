@@ -102,23 +102,16 @@ const Footer = () => (
   <div className="w-full px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
 
     {/* LEFT — Quick Links */}
-    <div>
-      <p className="font-medium mb-3">Quick Links</p>
-      <ul className="space-y-2 text-sm text-slate-600">
-        <li>
-          <Link to="/about" className="hover:text-slate-900">About</Link>
-        </li>
-        <li>
-          <Link to="/products" className="hover:text-slate-900">Products</Link>
-        </li>
-        <li>
-          <Link to="/projects" className="hover:text-slate-900">Projects</Link>
-        </li>
-        <li>
-          <Link to="/contact" className="hover:text-slate-900">Contact</Link>
-        </li>
-      </ul>
-    </div>
+      <div className="max-w-xs">
+        <p className="font-medium mb-3">Quick Links</p>
+        <ul className="space-y-2 text-sm text-slate-600">
+          <li><Link to="/about" className="hover:text-slate-900">About</Link></li>
+          <li><Link to="/products" className="hover:text-slate-900">Products</Link></li>
+          <li><Link to="/projects" className="hover:text-slate-900">Projects</Link></li>
+          <li><Link to="/contact" className="hover:text-slate-900">Contact</Link></li>
+        </ul>
+      </div>
+
 
     {/* CENTER — Logo */}
     <div className="flex justify-center">
@@ -128,18 +121,23 @@ const Footer = () => (
 </div>
 
     {/* RIGHT — Contact */}
-    <div className="text-sm text-slate-600 space-y-2 md:text-right">
-      <p className="font-medium mb-3">Contact</p>
-      <p className="flex items-center gap-2 md:justify-end">
-        <Phone size={16} /> +91 98490 01016; +91 79810 35920
-      </p>
-      <p className="flex items-center gap-2 md:justify-end">
-        <Mail size={16} /> contact@rgasoundimage.com
-      </p>
-      <p className="flex items-center gap-2 md:justify-end">
-        <MapPin size={16} /> Hyderabad, Telangana, India
-      </p>
-    </div>
+      <div className="text-sm text-slate-600 space-y-2 md:text-right">
+        {/* Heading — match Quick Links */}
+        <p className="font-medium mb-3 text-base text-slate-900">
+          Contact
+        </p>
+
+        {/* Content — keep existing size */}
+        <p className="flex items-center gap-2 md:justify-end">
+          <Phone size={16} /> +91 98490 01016; +91 79810 35920
+        </p>
+        <p className="flex items-center gap-2 md:justify-end">
+          <Mail size={16} /> contact@rgasoundimage.com
+        </p>
+        <p className="flex items-center gap-2 md:justify-end">
+          <MapPin size={16} /> Hyderabad, Telangana, India
+        </p>
+      </div>
   </div>
 
   {/* Bottom footer row */}
@@ -441,6 +439,36 @@ const Projects = () => {
 );
 };
 
+const handleWhatsAppAfterSubmit = (e) => {
+  e.preventDefault(); // stop default browser navigation
+
+  const form = e.target;
+
+  const name = form.name.value;
+  const email = form.email.value;
+  const phone = form.phone.value;
+  const message = form.message.value;
+
+  const whatsappText = encodeURIComponent(
+    `Hi RGA Sound Image,
+
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+
+Message:
+${message}`
+  );
+
+  const whatsappUrl = `https://wa.me/917981035920?text=${whatsappText}`;
+
+  // Open WhatsApp first (browser allows this)
+  window.open(whatsappUrl, "_blank");
+
+  // THEN submit the form to Formspree
+  form.submit();
+};
+
 
 const Contact = () => {
 
@@ -450,21 +478,37 @@ const Contact = () => {
   }, []);
 
   return (
-  <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
-    <h1 className="text-3xl md:text-4xl font-semibold mb-6">Contact</h1>
-    <div className="grid lg:grid-cols-2 gap-8">
-      <Card className="rounded-2xl">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+      <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-center max-w-2xl mx-auto">
+        Contact
+      </h1>
+
+      <div className="flex justify-center">
+    <Card className="rounded-2xl w-full max-w-2xl">
         <CardHeader><CardTitle>Send us a message</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <Input placeholder="Your name"/>
-          <Input placeholder="Email" type="email"/>
-          <Input placeholder="Phone"/>
-          <Textarea placeholder="Tell us about your project" rows={5}/>
-          <Button className="rounded-2xl">Submit</Button>
-          <p className="text-xs text-slate-500">This is a static form. Hook it to your email/CRM (Formspree, Airtable, etc.).</p>
-        </CardContent>
+          <CardContent>
+            <form
+              action="https://formspree.io/f/xnjjbqlz"
+              method="POST"
+              className="space-y-4"
+              onSubmit={handleWhatsAppAfterSubmit}
+            >
+              <Input name="name" placeholder="Your name" required />
+              <Input name="email" type="email" placeholder="Email" required />
+              <Input name="phone" placeholder="Phone" />
+              <Textarea
+                name="message"
+                placeholder="Tell us about your project"
+                rows={5}
+              />
+
+              <Button type="submit" className="rounded-2xl">
+                Submit
+              </Button>
+            </form>
+          </CardContent>
       </Card>
-      <Card className="rounded-2xl">
+      {/*<Card className="rounded-2xl">
         <CardHeader><CardTitle>Reach us</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-slate-700">
           <p className="flex items-center gap-2"><Phone size={16}/> +917981035920; +919849001016</p>
@@ -474,7 +518,7 @@ const Contact = () => {
             <iframe title="map" className="w-full h-60" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2459.8367227786457!2d78.49255064261227!3d17.42343644082144!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb99f5a9129611%3A0x361ae86bd1feb2aa!2sA%2C%20GN160%2C%206-6-431%2C%20behind%20Necklace%20Pride%2C%20Gandhi%20Nagar%2C%20Bhoiguda%2C%20Secunderabad%2C%20Telangana%20500080!5e0!3m2!1sen!2sin!4v1762631746829!5m2!1sen!2sin"></iframe>
           </div>
         </CardContent>
-      </Card>
+      </Card>*/}
     </div>
   </section>
 );
