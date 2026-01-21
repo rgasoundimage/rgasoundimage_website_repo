@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* REMOVE Vite default styles – use clean minimal base */
 
 html, body {

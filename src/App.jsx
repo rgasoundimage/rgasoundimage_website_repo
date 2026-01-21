@@ -48,7 +48,7 @@ const Shell = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900" style={{"--brand": BRAND.primary}}>
-      <header className="sticky top-0 z-30 border-b" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
+      <header className="sticky top-0 z-30 border-b border-slate-200" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
         <div className="w-full px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 text-slate-900 hover:text-slate-900 visited:text-slate-900">
           <Logo />
@@ -97,7 +97,7 @@ const NavLink = ({ to, label, current }) => (
 );
 
 const Footer = () => (
-  <><footer className="border-t mt-16">
+  <><footer className="border-t mt-16 border-slate-200" >
   {/* Top footer row */}
   <div className="w-full px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
 
