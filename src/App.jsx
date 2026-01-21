@@ -410,7 +410,7 @@ const Projects = () => {
         {
           title: "Home Theatre – Hyderabad",
           tag: "Home Cinema",
-          desc: "5.1 home theatre system with screen, speaker and subwoofer alignment.",
+          desc: "5.1 Home theatre system with screen, speaker and subwoofer alignment.",
           video: "/videos/Hometheatre-Hyderabad.mp4",
         }, 
         {
