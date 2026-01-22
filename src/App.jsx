@@ -591,6 +591,7 @@ const ProjectCard = ({ title, tag, desc, video }) => {
   const [muted, setMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showUI, setShowUI] = useState(false);
+  const [isFakeFullscreen, setIsFakeFullscreen] = useState(false);
 
   const revealUI = () => {
     setShowUI(true);
@@ -614,6 +615,10 @@ const ProjectCard = ({ title, tag, desc, video }) => {
       videoRef.current.webkitRequestFullscreen();
     }
   };
+
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px)").matches;
 
   return (
     <Card className="rounded-2xl overflow-hidden transition hover:shadow-md">
@@ -656,10 +661,9 @@ const ProjectCard = ({ title, tag, desc, video }) => {
                 pointer-events-none
                 absolute inset-0 flex items-center justify-center
                 transition-opacity duration-300
-                ${
-                  videoRef.current?.paused && !showUI
-                    ? "opacity-100"
-                    : "opacity-0"
+                ${videoRef.current?.paused && !showUI
+                  ? "opacity-100"
+                  : "opacity-0"
                 }
               `}
             >
@@ -712,19 +716,25 @@ const ProjectCard = ({ title, tag, desc, video }) => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleFullscreen(e);
                 revealUI();
+
+                if (isMobile) {
+                  setIsFakeFullscreen(true);
+                } else {
+                  handleFullscreen(e);
+                }
               }}
               className={`
-                absolute bottom-3 left-3 z-20
-                bg-black/60 text-white p-2 rounded-full
-                transition-opacity duration-300
-                ${showUI ? "opacity-100" : "opacity-0"}
-              `}
+    absolute bottom-3 left-3 z-20
+    bg-black/60 text-white p-2 rounded-full
+    transition-opacity duration-300
+    ${showUI ? "opacity-100" : "opacity-0"}
+  `}
               aria-label="Fullscreen"
             >
               <Maximize size={18} />
             </button>
+
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-400">
@@ -741,6 +751,26 @@ const ProjectCard = ({ title, tag, desc, video }) => {
         <p className="font-medium">{title}</p>
         <p className="text-sm text-slate-600">{desc}</p>
       </CardContent>
+      {isFakeFullscreen && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center px-4">
+          <button
+            onClick={() => setIsFakeFullscreen(false)}
+            className="absolute top-4 right-4 z-10 bg-black/60 text-white p-2 rounded-full"
+            aria-label="Close video"
+          >
+            ✕
+          </button>
+          <div className="w-full max-w-5xl aspect-video">
+            <video
+              src={video}
+              className="w-full h-full object-contain"
+              controls
+              autoPlay
+              playsInline
+            />
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
