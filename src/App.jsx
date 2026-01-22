@@ -76,7 +76,7 @@ const Shell = ({ children }) => {
         </div>
         {/* Mobile menu dropdown */}
         {mobileOpen && (
-          <div className="md:hidden border-t bg-white">
+          <div className="md:hidden border-t bg-white border-slate-200">
             <nav className="px-4 py-6 flex flex-col gap-4 text-sm items-center text-center">
               <Link to="/" onClick={() => setMobileOpen(false)}>Home</Link>
               <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
