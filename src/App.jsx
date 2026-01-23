@@ -1,7 +1,6 @@
 import React from "react";
-import { BrowserRouter, Routes, Route,Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Phone, Mail, MapPin, ChevronRight, Play, Building2, AudioLines, Layers, VolumeX, Volume2, Maximize } from "lucide-react";
@@ -11,9 +10,13 @@ import { Menu, X } from "lucide-react";
 import { useEffect } from "react";
 import { useRef } from "react";
 import Header from "./layout/Header";
-import { BRAND } from "./config/brand";
-import Logo from "./components/common/Logo";
 import { useState } from "react";
+import Footer from "./layout/Footer";
+import CtaBand from "./components/sections/CtaBand";
+import { BRAND } from "./config/brand";
+import { Button } from "@/components/ui/button";
+
+
 
 
 // =============================
@@ -28,61 +31,7 @@ const Shell = ({ children }) => (
 );
      
 
-const NavLink = ({ to, label, current }) => (
-  <Link to={to} className={`transition hover:text-slate-900 ${current ? "text-slate-900" : "text-slate-600"}`}>{label}</Link>
-);
 
-const Footer = () => (
-  <><footer className="border-t mt-16 border-slate-200" >
-  {/* Top footer row */}
-  <div className="w-full px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-
-    {/* LEFT — Quick Links */}
-      <div className="max-w-xs">
-        <p className="font-medium mb-3">Quick Links</p>
-        <ul className="space-y-2 text-sm text-slate-600">
-          <li><Link to="/about" className="hover:text-slate-900">About</Link></li>
-          <li><Link to="/products" className="hover:text-slate-900">Products</Link></li>
-          <li><Link to="/projects" className="hover:text-slate-900">Projects</Link></li>
-          <li><Link to="/contact" className="hover:text-slate-900">Contact</Link></li>
-        </ul>
-      </div>
-
-
-    {/* CENTER — Logo */}
-    <div className="flex justify-center">
-  <div className="scale-150">
-    <Logo />
-  </div>
-</div>
-
-    {/* RIGHT — Contact */}
-      <div className="text-sm text-slate-600 space-y-2 md:text-right">
-        {/* Heading — match Quick Links */}
-        <p className="font-medium mb-3 text-base text-slate-900">
-          Contact
-        </p>
-
-        {/* Content — keep existing size */}
-        <p className="flex items-center gap-2 md:justify-end">
-          <Phone size={16} /> +91 98490 01016; +91 79810 35920
-        </p>
-        <p className="flex items-center gap-2 md:justify-end">
-          <Mail size={16} /> contact@rgasoundimage.com
-        </p>
-        <p className="flex items-center gap-2 md:justify-end">
-          <MapPin size={16} /> Hyderabad, Telangana, India
-        </p>
-      </div>
-  </div>
-
-  {/* Bottom footer row */}
-  <div className="text-center text-xs text-slate-500 pb-8">
-    © {new Date().getFullYear()} RGA Sound Image. All rights reserved.
-  </div>
-</footer>
-</>
-);
 
 // =============================
 // Pages
@@ -721,24 +670,7 @@ const Stat = ({ number, label }) => (
   </div>
 );
 
-const CtaBand = () => (
-  <section className="py-16">
-    <div className="w-full px-4 sm:px-6 lg:px-8">
-      <Card className="rounded-2xl">
-        <CardContent className="p-8 md:p-10 grid md:grid-cols-2 gap-6 items-center">
-          <div>
-            <h3 className="text-2xl font-semibold">Ready to design your space?</h3>
-            <p className="text-slate-600 mt-2">Tell us about your cinema, boardroom, auditorium, or venue. We’ll recommend the right system and deliver end-to-end.</p>
-          </div>
-          <div className="flex gap-3 md:justify-end">
-            <Link to="/contact"><Button className="rounded-2xl">Get a Consultation</Button></Link>
-            <a href={BRAND.whatsapp} target="_blank" rel="noreferrer"><Button variant="outline" className="rounded-2xl">Chat on WhatsApp</Button></a>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </section>
-);
+
 
 const HeroMockup = () => (
   <div className="relative rounded-3xl shadow-lg overflow-hidden">
