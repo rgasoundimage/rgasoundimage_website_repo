@@ -173,7 +173,7 @@ const Home = () => {
       />
 
       {/* Main hero content */}
-      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24">
+      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 pb-1">
         <div className="grid grid-cols-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -181,16 +181,13 @@ const Home = () => {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <span className="inline-flex items-center gap-2 text-xs font-medium bg-slate-100 rounded-full px-3 py-1 w-fit -translate-y-8">
-              <AudioLines size={14} /> Dolby-Certified AV Integrators
-            </span>
-
+           
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
               Immersive audio-visual solutions for cinemas, commercial & professional spaces
             </h1>
 
             <p className="text-slate-600">
-              From acoustic design to commissioning, we deliver turnkey projects that meet Dolby standards and brand expectations. Authorized distributor of Stonewater Audio; solution partners with JBL and Yamaha.
+              From acoustic design to commissioning, we deliver turnkey projects that meet Dolby standards and brand expectations. Authorized distributor of Stonewater Audio; solution partners with Dolby and Harman.
             </p>
 
             <div className="flex flex-wrap gap-3 translate-y-12">
@@ -203,6 +200,10 @@ const Home = () => {
                 </Button>
               </Link>
             </div>
+            <span className="inline-flex items-center gap-2 text-xs font-medium bg-slate-100 rounded-full px-3 py-1 w-fit mt-25">
+  <AudioLines size={14} /> Dolby-Certified AV Integrators
+</span>
+
           </motion.div>
         </div>
       </div>
@@ -329,8 +330,8 @@ const Products = () => {
   <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>
 
   <p className="text-slate-700">
-    Curated portfolio from Stonewater Audio (authorized distributor), JBL Professional,
-    Yamaha Commercial Audio, and more.
+    Curated portfolio from Stonewater Audio (authorized distributor AP and Telangana), JBL Professional,
+    Yamaha Commercial Audio, Onkyo and more.
   </p>
 
   {/* Catalogs */}
@@ -392,11 +393,14 @@ const Products = () => {
         <CardContent className="p-6 flex flex-wrap items-center gap-4 text-sm text-slate-700">
           <span className="font-medium">Featured brands:</span>
           <Badge>Stonewater Audio</Badge>
-          <Badge>JBL Professional</Badge>
+          <Badge>JBL</Badge>
+          <Badge>Crown</Badge>
+          <Badge>Dolby</Badge>
+          <Badge>Onkyo</Badge>
           <Badge>Yamaha</Badge>
-          <Badge>Shure</Badge>
-          <Badge>Extron</Badge>
-          <Badge>QSC</Badge>
+          <Badge>Kasper</Badge>
+          <Badge>18 Sounds</Badge>
+          <Badge>Fonestar</Badge>
         </CardContent>
       </Card>
     </div>
