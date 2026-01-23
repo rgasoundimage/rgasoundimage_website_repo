@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route,Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,91 +7,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Phone, Mail, MapPin, ChevronRight, Play, Building2, AudioLines, Layers, VolumeX, Volume2, Maximize } from "lucide-react";
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
-import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useEffect } from "react";
 import { useRef } from "react";
+import Header from "./layout/Header";
+import { BRAND } from "./config/brand";
+import Logo from "./components/common/Logo";
+import { useState } from "react";
 
-
-// =============================
-// Brand & Site Config
-// =============================
-const BRAND = {
-  name: "RGA Sound Image",
-  tagline: "Designing sound that speaks to every space. Since 1995.",
-  heritage: "Elevating audio experiences since 1995",
-  description:
-    "RGA Sound Image is a pioneer in Dolby-certified sound solutions across Andhra Pradesh and Telangana. We specialize in audio-visual consultation and turnkey installations for cinemas, commercial environments, and professional spaces. As authorized distributors of Stonewater Audio and partners with renowned global brands like JBL and Yamaha, we craft immersive sound experiences tailored to each client’s needs.",
-  primary: "#0B1C53", // deep navy
-  secondary: "#0F2A7E", // accent
-  whatsapp: "https://wa.me/917981035920?text=Hi%20RGA%20Sound%20Image,%20I%20would%20like%20a%20consultation%20for%20an%20AV%20project.", // add your number like 91XXXXXXXXXX
-};
-
-// =============================
-// Logo (uses external image) – with slight left shift and 1:3 ratio
-// =============================
-const Logo = () => (
-  <div className="-ml-4">{/* shift logo slightly left */}
-    <img
-      src="https://i.postimg.cc/RhzYmvfw/RGA-logo-No-background.png"
-      alt="RGA Sound Image logo"
-      className="h-32 w-11 object-contain select-none"
-      draggable={false}
-    />
-  </div>
-);
 
 // =============================
 // Layout
 // =============================
-const Shell = ({ children }) => {
-  const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-900" style={{"--brand": BRAND.primary}}>
-      <header className="sticky top-0 z-30 border-b border-slate-200" style={{ backdropFilter: "blur(10px)", background: "rgba(255,255,255,0.75)"}}>
-        <div className="w-full px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-slate-900 hover:text-slate-900 visited:text-slate-900">
-          <Logo />
-            <div className="flex flex-col leading-tight">
-              <span className="font-semibold text-[1.5rem] tracking-tight">{BRAND.name}</span>
-              <span className="text-[0.65rem] text-slate-500 tracking-[0.1em] uppercase">{BRAND.heritage}</span>
-            </div>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <NavLink to="/" label="Home" current={location.pathname === "/"} />
-            <NavLink to="/about" label="About" current={location.pathname.startsWith("/about")} />
-            <NavLink to="/products" label="Products" current={location.pathname.startsWith("/products")} />
-            <NavLink to="/projects" label="Projects" current={location.pathname.startsWith("/projects")} />
-            <NavLink to="/contact" label="Contact" current={location.pathname.startsWith("/contact")} />
-          </nav>
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-slate-100"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Open menu"
-          >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-        {/* Mobile menu dropdown */}
-        {mobileOpen && (
-          <div className="md:hidden border-t bg-white border-slate-200">
-            <nav className="px-4 py-6 flex flex-col gap-4 text-sm items-center text-center">
-              <Link to="/" onClick={() => setMobileOpen(false)}>Home</Link>
-              <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
-              <Link to="/products" onClick={() => setMobileOpen(false)}>Products</Link>
-              <Link to="/projects" onClick={() => setMobileOpen(false)}>Projects</Link>
-              <Link to="/contact" onClick={() => setMobileOpen(false)}>Contact</Link>
-            </nav>
-          </div>
-        )}
-      </header>
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
-  );
-};
+const Shell = ({ children }) => (
+  <div className="min-h-screen flex flex-col bg-white text-slate-900">
+  <Header />
+    <main className="flex-1">{children}</main>
+    <Footer />
+  </div>
+);
+     
 
 const NavLink = ({ to, label, current }) => (
   <Link to={to} className={`transition hover:text-slate-900 ${current ? "text-slate-900" : "text-slate-600"}`}>{label}</Link>
