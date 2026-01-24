@@ -1,13 +1,20 @@
 import { useEffect } from "react";
+import ReactGA from "react-ga4";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// ⬇️ KEEP YOUR HANDLER EXACTLY AS IS
+// ⬇️ SAME HANDLER, WITH GA ADDED
 const handleWhatsAppAfterSubmit = (e) => {
   e.preventDefault(); // stop default browser navigation
+
+  // 🔹 GA4: Contact form submit
+  ReactGA.event({
+    category: "Form",
+    action: "contact_form_submit",
+  });
 
   const form = e.target;
 
@@ -29,7 +36,7 @@ ${message}`
 
   const whatsappUrl = `https://wa.me/917981035920?text=${whatsappText}`;
 
-  // Open WhatsApp first (browser allows this)
+  // Open WhatsApp first
   window.open(whatsappUrl, "_blank");
 
   // THEN submit the form to Formspree
@@ -79,3 +86,4 @@ export default function Contact() {
     </section>
   );
 }
+
