@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Building2, Layers, AudioLines } from "lucide-react";
 import CtaBand from "../components/sections/CtaBand";
 import ValueCard from "../components/cards/ValueCard";
+import HeroMockup from "../components/sections/HeroMockup";
+
 
 
 const Home = () => {
