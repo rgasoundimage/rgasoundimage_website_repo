@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AnalyticsTracker from "./AnalyticsTracker";
 
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
@@ -20,6 +21,7 @@ const Shell = ({ children }) => (
 export default function App() {
   return (
     <BrowserRouter>
+     <AnalyticsTracker />
       <Shell>
         <Routes>
           <Route path="/" element={<Home />} />
