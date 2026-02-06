@@ -16,6 +16,7 @@ export default function Chatbot() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [expecting, setExpecting] = useState(null); // "contact" | null
   const messagesEndRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
 
   const [formData, setFormData] = useState({
     enquiryType: "",
@@ -45,11 +46,32 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const lastActivity = lastActivityRef.current;
+  
+      // 1 minute = 60,000 ms
+      if (
+        isOpen &&
+        !isCompleted &&
+        now - lastActivity > 60000
+      ) {
+        resetChatbot();
+      }
+    }, 1000); // check every second
+  
+    return () => clearInterval(interval);
+  }, [isOpen, isCompleted]);
+  
+
   /* =========================
      3. HANDLERS
      ========================= */
 
   const handleButtonClick = (option) => {
+    lastActivityRef.current = Date.now();
+
     setMessages((prev) => {
       const updated = [...prev];
 
@@ -81,6 +103,8 @@ export default function Chatbot() {
   };
 
   const handleSend = () => {
+    lastActivityRef.current = Date.now();
+    
     const { name, email, phone } = formData;
 
     // Show user input in chat
@@ -244,12 +268,13 @@ export default function Chatbot() {
                       type="text"
                       placeholder="Your name"
                       value={formData.name}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        lastActivityRef.current = Date.now();
                         setFormData((prev) => ({
                           ...prev,
                           name: e.target.value,
                         }))
-                      }
+                      }}
                       style={inputStyle}
                     />
       
@@ -257,12 +282,13 @@ export default function Chatbot() {
                       type="email"
                       placeholder="Your email"
                       value={formData.email}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        lastActivityRef.current = Date.now();
                         setFormData((prev) => ({
                           ...prev,
                           email: e.target.value,
                         }))
-                      }
+                      }}
                       style={inputStyle}
                     />
       
@@ -270,12 +296,13 @@ export default function Chatbot() {
                       type="tel"
                       placeholder="Your phone number"
                       value={formData.phone}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        lastActivityRef.current = Date.now();
                         setFormData((prev) => ({
                           ...prev,
                           phone: e.target.value,
                         }))
-                      }
+                      }}
                       style={inputStyle}
                     />
       
