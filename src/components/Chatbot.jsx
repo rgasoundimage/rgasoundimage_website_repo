@@ -104,7 +104,7 @@ export default function Chatbot() {
 
   const handleSend = () => {
     lastActivityRef.current = Date.now();
-    
+
     const { name, email, phone } = formData;
 
     // Show user input in chat
@@ -153,19 +153,47 @@ export default function Chatbot() {
       return;
     }
 
-    // Success
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "bot",
-        text:
-          "Thank you! ✅ Our team at RGA Sound Image will contact you shortly.",
-      },
-    ]);
+      // Success
+      // Send lead to backend
+      fetch("/.netlify/functions/sendLead", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+              enquiryType: formData.enquiryType,
+              name,
+              email,
+              phone: cleanPhone,
+          }),
+      })
+          .then((res) => {
+              if (!res.ok) throw new Error("Failed to send lead");
+              return res.json();
+          })
+          .then(() => {
+              setMessages((prev) => [
+                  ...prev,
+                  {
+                      sender: "bot",
+                      text:
+                          "Thank you! ✅ Our team at RGA Sound Image will contact you shortly.",
+                  },
+              ]);
 
-    setFormData((prev) => ({ ...prev, phone: cleanPhone }));
-    setExpecting(null);
-    setIsCompleted(true);
+              setExpecting(null);
+              setIsCompleted(true);
+          })
+          .catch(() => {
+              setMessages((prev) => [
+                  ...prev,
+                  {
+                      sender: "bot",
+                      text:
+                          "Sorry 😕 something went wrong while sending your details. Please try again later.",
+                  },
+              ]);
+          });
   };
 
   const resetChatbot = () => {
