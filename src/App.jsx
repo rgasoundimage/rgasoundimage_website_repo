@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
+import Chatbot from "./components/Chatbot";
 
 const Shell = ({ children }) => (
   <div className="min-h-screen flex flex-col bg-white text-slate-900">
@@ -30,6 +31,10 @@ export default function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
+
+        {/* Chatbot lives here */}
+        <Chatbot />
+        
       </Shell>
     </BrowserRouter>
   );
