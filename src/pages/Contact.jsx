@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 // ⬇️ SAME HANDLER, WITH GA ADDED
-const handleWhatsAppAfterSubmit = (e) => {
-  e.preventDefault(); // stop default browser navigation
+const handleWhatsAppAfterSubmit = async (e) => {
+  e.preventDefault();
 
-  // 🔹 GA4: Contact form submit
+  // 🔹 GA4 event
   ReactGA.event({
     category: "Form",
     action: "contact_form_submit",
@@ -18,30 +18,40 @@ const handleWhatsAppAfterSubmit = (e) => {
 
   const form = e.target;
 
-  const name = form.name.value;
-  const email = form.email.value;
-  const phone = form.phone.value;
-  const message = form.message.value;
+  const payload = {
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    message: form.message.value,
+  };
 
+  // 🔹 Send email via Netlify Function (Gmail SMTP)
+  await fetch("/.netlify/functions/sendcontact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  // 🔹 WhatsApp redirect
   const whatsappText = encodeURIComponent(
     `Hi RGA Sound Image,
 
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
+Name: ${payload.name}
+Email: ${payload.email}
+Phone: ${payload.phone}
 
 Message:
-${message}`
+${payload.message}`
   );
 
-  const whatsappUrl = `https://wa.me/917981035920?text=${whatsappText}`;
+  window.open(
+    `https://wa.me/917981035920?text=${whatsappText}`,
+    "_blank"
+  );
 
-  // Open WhatsApp first
-  window.open(whatsappUrl, "_blank");
-
-  // THEN submit the form to Formspree
-  form.submit();
+  form.reset();
 };
+
 
 export default function Contact() {
   useEffect(() => {
@@ -61,12 +71,7 @@ export default function Contact() {
           </CardHeader>
 
           <CardContent>
-            <form
-              action="https://formspree.io/f/xnjjbqlz"
-              method="POST"
-              className="space-y-4"
-              onSubmit={handleWhatsAppAfterSubmit}
-            >
+            <form className="space-y-4" onSubmit={handleWhatsAppAfterSubmit}>
               <Input name="name" placeholder="Your name" required />
               <Input name="email" type="email" placeholder="Email" required />
               <Input name="phone" placeholder="Phone" />
@@ -74,6 +79,7 @@ export default function Contact() {
                 name="message"
                 placeholder="Tell us about your project"
                 rows={5}
+                required
               />
 
               <Button type="submit" className="rounded-2xl">
