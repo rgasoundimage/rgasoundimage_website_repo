@@ -101,7 +101,7 @@ const Home = () => {
           {[
             { name: "Skechers_Footwear", logo: "/clients/SKECHERS_logo.png" },
             { name: "Third_wave_coffee", logo: "/clients/TWC_logo.png" },
-            { name: "Mukta_cinemas", logo: "/clients/mukta_cinemas.jpg" },
+            { name: "Mukta_cinemas", logo: "/clients/mukta_cinemas.png" },
             { name: "ISB_Hyd", logo: "/clients/Indian_School_of_Business_Logo.png" },
             { name: "devi-sudarshan", logo: "/clients/devi-sud-megaplex.png" },
             { name: "JIC", logo: "/clients/Jhic-logo.png" },
