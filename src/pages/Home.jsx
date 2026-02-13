@@ -103,9 +103,9 @@ const Home = () => {
             { name: "Third_wave_coffee", logo: "/clients/TWC_logo.png" },
             { name: "Mukta_cinemas", logo: "/clients/mukta_cinemas.jpg" },
             { name: "ISB_Hyd", logo: "/clients/Indian_School_of_Business_Logo.png" },
-            /*{ name: "ITC Hotels", logo: "/clients/itc.svg" },
-            { name: "Infosys", logo: "/clients/infosys.svg" },
-            { name: "Government of Telangana", logo: "/clients/telangana.svg" },*/
+            { name: "devi-sudarshan", logo: "/clients/devi-sud-megaplex.png" },
+            { name: "JIC", logo: "/clients/Jhic-logo.png" },
+            /*{ name: "Government of Telangana", logo: "/clients/telangana.svg" },*/
           ].map((client, i) => (
             <div
               key={i}
