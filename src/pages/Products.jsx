@@ -78,22 +78,42 @@ const Products = () => {
           items={["Audio cabling", "Speaker hardware", "Racks & power", "Mounts"]}
         />
       </div>
-      <div className="mt-10">
-        <Card className="rounded-2xl">
-          <CardContent className="p-6 flex flex-wrap items-center gap-4 text-sm text-slate-700">
-            <span className="font-medium">Featured brands:</span>
-            <Badge>Stonewater Audio</Badge>
-            <Badge>JBL</Badge>
-            <Badge>Crown</Badge>
-            <Badge>Dolby</Badge>
-            <Badge>Onkyo</Badge>
-            <Badge>Yamaha</Badge>
-            <Badge>Kasper</Badge>
-            <Badge>18 Sounds</Badge>
-            <Badge>Fonestar</Badge>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="mt-10">
+          <Card className="rounded-2xl">
+            <CardContent className="p-6">
+              <p className="font-medium text-sm text-slate-900 mb-6">
+                Featured brands:
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-8 items-center">
+                {[
+                  { name: "Stonewater Audio", src: "/brands/stonewater-logo.png" },
+                  { name: "JBL", src: "/brands/jbl-logo.png" },
+                  { name: "Crown", src: "/brands/crownaudio-logo.png" },
+                  { name: "Dolby", src: "/brands/dolby-logo.png" },
+                  { name: "Onkyo", src: "/brands/onkyo-logo.png" },
+                  { name: "Yamaha", src: "/brands/yamaha-logo.png" },
+                  { name: "Kasper", src: "/brands/kasper-logo.png" },
+                  { name: "Fonestar", src: "/brands/fonestar-logo.png" },
+                  { name: "ELAC", src: "/brands/elac-logo.png" },
+                  { name: "Ecler", src: "/brands/ecler-logo.png" },
+                ].map((brand) => (
+                  <div
+                    key={brand.name}
+                    className="h-20 flex items-center justify-center"
+                  >
+                    <img
+                      src={brand.src}
+                      alt={brand.name}
+                      className="h-8 w-auto object-contain grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition duration-300"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
     </section>
    );
   };
