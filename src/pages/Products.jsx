@@ -81,10 +81,9 @@ const Products = () => {
         <div className="mt-10">
           <Card className="rounded-2xl">
             <CardContent className="p-6">
-              <p className="font-medium text-sm text-slate-900 mb-6">
-                Featured brands:
+              <p className="text-lg md:text-xl font-semibold text-slate-900 mb-8">
+                Featured Brands
               </p>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-8 items-center">
                 {[
                   { name: "Stonewater Audio", src: "/brands/stonewater-logo.png" },
