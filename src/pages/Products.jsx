@@ -20,8 +20,7 @@ const Products = () => {
     <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>
   
     <p className="text-slate-700">
-      Curated portfolio from Stonewater Audio (authorized distributor AP and Telangana), JBL Professional,
-      Yamaha Commercial Audio, Onkyo and more.
+    Explore our curated portfolio of cinema and commercial AV solutions featuring Stonewater Audio (authorized distributor for Andhra Pradesh and Telangana), along with JBL Professional, Yamaha Commercial Audio, Onkyo and other leading brands — supporting projects across India.
     </p>
   
     {/* Catalogs */}
