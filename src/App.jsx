@@ -10,6 +10,9 @@ import Products from "./pages/Products";
 import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import Chatbot from "./components/Chatbot";
+import Blog from "./pages/Blog";
+import Article from "./pages/Article.jsx"; // we’ll create this later
+
 
 const Shell = ({ children }) => (
   <div className="min-h-screen flex flex-col bg-white text-slate-900">
@@ -30,6 +33,10 @@ export default function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
+
+          {/* Insights / Blog */}
+          <Route path="/insights" element={<Blog />} />
+          <Route path="/insights/:slug" element={<Article />} />
         </Routes>
 
         {/* Chatbot lives here */}

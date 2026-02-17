@@ -55,6 +55,11 @@ export default function Header() {
                 label="Contact"
                 current={location.pathname.startsWith("/contact")}
               />
+              <NavLink
+                to="/insights"
+                label="Insights"
+                current={location.pathname.startsWith("/insights")}
+              />
             </nav>
     
             {/* Mobile menu button */}
@@ -85,6 +90,9 @@ export default function Header() {
                 </Link>
                 <Link to="/contact" onClick={() => setMobileOpen(false)}>
                   Contact
+                </Link>
+                <Link to="/insights" onClick={() => setMobileOpen(false)}>
+                  Insights
                 </Link>
               </nav>
             </div>
