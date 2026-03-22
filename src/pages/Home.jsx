@@ -43,7 +43,7 @@ const Home = () => {
             >
              
               <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-                Immersive audio-visual solutions for cinemas, commercial & professional spaces
+                Immersive audio-visual solutions for home, cinemas, commercial & professional spaces
               </h1>
   
               <p className="text-slate-600">
@@ -100,7 +100,7 @@ const Home = () => {
               >
           {[
             { name: "Skechers_Footwear", logo: "/clients/SKECHERS_logo.png" },
-            { name: "Third_wave_coffee", logo: "/clients/TWC_logo.png" },
+            { name: "Nike", logo: "/clients/nike-logo.png" },
             { name: "Mukta_cinemas", logo: "/clients/mukta_cinemas.png" },
             { name: "ISB_Hyd", logo: "/clients/Indian_School_of_Business_Logo.png" },
             { name: "devi-sudarshan", logo: "/clients/devi-sud-megaplex.png" },
