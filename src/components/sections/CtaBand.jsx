@@ -27,7 +27,7 @@ export default function CtaBand() {
           <CardContent className="p-8 md:p-10 grid md:grid-cols-2 gap-6 items-center">
             <div>
               <h3 className="text-2xl font-semibold">
-                Ready to design your space?
+                Ready to design sound for your space?
               </h3>
               <p className="text-slate-600 mt-2">
                 Tell us about your cinema, boardroom, auditorium, or venue.
