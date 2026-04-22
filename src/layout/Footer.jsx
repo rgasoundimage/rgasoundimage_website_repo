@@ -37,7 +37,7 @@ export default function Footer() {
   
           {/* Content — keep existing size */}
           <p className="flex items-center gap-2 md:justify-end">
-            <Phone size={16} /> +91 98490 01016; +91 79810 35920
+            <Phone size={16} /> +917981035920; +919849001016
           </p>
           <p className="flex items-center gap-2 md:justify-end">
             <Mail size={16} /> contact@rgasoundimage.com
