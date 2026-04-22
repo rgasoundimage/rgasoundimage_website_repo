@@ -61,7 +61,7 @@ const About = () => {
 
           </div>
 
-          {/* Head of Product Profile 
+          {/* Head of Product Profiles 
           <div className="flex flex-col sm:flex-row gap-6 items-start">
 
             <div className="w-40 h-40 bg-slate-200 rounded-2xl shrink-0"></div>
