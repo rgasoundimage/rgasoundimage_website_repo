@@ -43,7 +43,7 @@ const Home = () => {
             >
              
               <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-                Immersive audio-visual solutions for home, cinemas, commercial & professional spaces
+                Immersive audio-visual solutions for professional, commercial, home & cinemas spaces
               </h1>
   
               <p className="text-slate-600">
