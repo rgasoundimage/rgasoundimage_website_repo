@@ -1,7 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'node:path';   // ✅ this lets us use @ alias
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
@@ -13,5 +16,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  ssr: {
+    noExternal: ["react-helmet-async"],
+  },
 });
-

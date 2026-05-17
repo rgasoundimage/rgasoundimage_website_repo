@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AnalyticsTracker from "./AnalyticsTracker";
+import { Routes, Route } from "react-router-dom";
 
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
@@ -11,7 +11,7 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import Chatbot from "./components/Chatbot";
 import Blog from "./pages/Blog";
-import Article from "./pages/Article.jsx"; // we’ll create this later
+import Article from "./pages/Article.jsx";
 
 
 const Shell = ({ children }) => (
@@ -22,10 +22,10 @@ const Shell = ({ children }) => (
   </div>
 );
 
-export default function App() {
+export default function App({ enableAnalytics = true, enableChatbot = true }) {
   return (
-    <BrowserRouter>
-     <AnalyticsTracker />
+    <>
+     {enableAnalytics && <AnalyticsTracker />}
       <Shell>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -40,9 +40,9 @@ export default function App() {
         </Routes>
 
         {/* Chatbot lives here */}
-        <Chatbot />
+        {enableChatbot && <Chatbot />}
         
       </Shell>
-    </BrowserRouter>
+    </>
   );
 }

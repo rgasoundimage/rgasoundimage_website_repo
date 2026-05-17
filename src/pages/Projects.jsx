@@ -1,16 +1,12 @@
-import { useEffect } from "react";
-
 import ProjectCard from "../components/cards/ProjectCard";
+import SEO from "../components/SEO";
+import { pageSeo } from "../config/seo";
 
 const Projects = () => {
-
-    useEffect(() => {
-      document.title =
-        " Professional Audio Installation Projects | RGA Sound Image";
-    }, []);
-  
     return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+      <SEO {...pageSeo.projects} />
+
       <div className="mb-8 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-semibold mb-2">Projects</h1>
         <p className="text-slate-700">

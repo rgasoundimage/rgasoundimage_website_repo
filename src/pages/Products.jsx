@@ -1,21 +1,15 @@
-import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, FileText } from "lucide-react";
 import CatalogItem from "../components/common/CatalogItem";
 import ProductCard from "../components/cards/ProductCard";
-import Badge from "../components/common/Badge";
+import SEO from "../components/SEO";
+import { pageSeo } from "../config/seo";
 
 
 
 const Products = () => {
-
-    useEffect(() => {
-      document.title =
-        "Cinema, Commercial & Professional Audio Products | RGA Sound Image";
-    }, []);
-  
     return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+      <SEO {...pageSeo.products} />
+
       <div className="mb-10 max-w-4xl space-y-5">
     <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>
   
@@ -28,13 +22,6 @@ const Products = () => {
       <p className="font-medium text-slate-900">Our Catalogs:</p>
   
       <div className="flex flex-wrap gap-4">
-        {/* Cinema Catalog */}
-        <CatalogItem
-          title="Cinema Systems"
-          href="/RGA-Cinema-Catalog.pdf"
-          size="PDF · 12 MB"
-        />
-  
         {/* Commercial Catalog */}
         <CatalogItem
           title="Commercial AV"

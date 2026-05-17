@@ -1,0 +1,78 @@
+export const SITE_URL = "https://www.rgasoundimage.com";
+
+export const DEFAULT_SEO = {
+  title: "RGA Sound Image | Professional Cinema & Commercial Audio Solutions",
+  description:
+    "RGA Sound Image designs, supplies, installs, and calibrates Dolby-certified cinema, commercial, professional, and home audio-visual systems across India.",
+  image: "/RGAlogo.png",
+};
+
+export const pageSeo = {
+  home: {
+    path: "/",
+    title: DEFAULT_SEO.title,
+    description: DEFAULT_SEO.description,
+  },
+  about: {
+    path: "/about",
+    title:
+      "About RGA Sound Image | Dolby-Certified Audio Experts in AP & Telangana",
+    description:
+      "Learn about RGA Sound Image, a professional AV integration team with over three decades of experience in cinema sound, commercial audio, Dolby calibration, and turnkey installations.",
+  },
+  products: {
+    path: "/products",
+    title:
+      "Cinema, Commercial & Professional Audio Products | RGA Sound Image",
+    description:
+      "Explore cinema systems, commercial speakers, amplifiers, DSP, microphones, projection, displays, cabling, and AV products from Stonewater Audio, JBL, Yamaha, Dolby, Onkyo, and more.",
+  },
+  projects: {
+    path: "/projects",
+    title: "Professional Audio Installation Projects | RGA Sound Image",
+    description:
+      "See selected cinema, auditorium, commercial AV, and home theatre projects delivered by RGA Sound Image, including design, installation, integration, and calibration.",
+  },
+  contact: {
+    path: "/contact",
+    title: "Contact RGA Sound Image | AV Solutions India",
+    description:
+      "Contact RGA Sound Image for cinema audio, commercial AV, home theatre, professional sound, calibration, and turnkey audio-visual project support.",
+  },
+  insights: {
+    path: "/insights",
+    title: "Cinema & Commercial AV Design Insights | RGA Sound Image",
+    description:
+      "Read practical guides on cinema sound, auditorium acoustics, commercial AV design, speaker selection, and professional audio installation planning.",
+  },
+};
+
+export const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "RGA Sound Image",
+  url: SITE_URL,
+  logo: `${SITE_URL}/RGAlogo.png`,
+  image: `${SITE_URL}/RGAlogo.png`,
+  telephone: "+917981035920",
+  email: "contact@rgasoundimage.com",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Hyderabad",
+    addressRegion: "Telangana",
+    addressCountry: "IN",
+  },
+  areaServed: [
+    "Hyderabad",
+    "Telangana",
+    "Andhra Pradesh",
+    "India",
+  ],
+  serviceType: [
+    "Cinema audio installation",
+    "Commercial AV integration",
+    "Professional audio systems",
+    "Home theatre installation",
+    "Dolby calibration",
+  ],
+};

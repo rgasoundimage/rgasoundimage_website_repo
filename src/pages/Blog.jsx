@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
+import { pageSeo } from "../config/seo";
 
 
 const categories = [
@@ -15,8 +17,6 @@ const featuredArticle = {
     category: "Cinema",
     description:
       "Key acoustic and speaker placement principles required to achieve clear dialogue and uniform coverage in medium and large theatres.",
-    readTime: "6 min read",
-    slug: "cinema-sound-design-india",
     image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1600&auto=format&fit=crop",
   };  
 
@@ -27,6 +27,7 @@ const featuredArticle = {
       description: "Understanding practical differences in real theatre installations, not marketing specs.",
       readTime: "5 min read",
       slug: "dolby-atmos-vs-7-1",
+      status: "published",
     },
     {
       title: "Fixing Echo in Large Auditoriums",
@@ -34,20 +35,21 @@ const featuredArticle = {
       description: "Common causes of speech echo and how acoustic treatment should be planned.",
       readTime: "4 min read",
       slug: "fix-auditorium-echo",
+      status: "published",
     },
     {
       title: "Choosing Speakers for Restaurants",
       category: "Commercial AV",
       description: "How coverage and mounting height affect customer comfort and ambience.",
-      readTime: "3 min read",
-      slug: "restaurant-speaker-guide",
+      readTime: "Coming soon",
+      status: "coming-soon",
     },
     {
       title: "Auditorium Sound System Cost in India",
       category: "Buying Guides",
       description: "Realistic budget ranges based on seating capacity and performance expectations.",
-      readTime: "6 min read",
-      slug: "auditorium-sound-cost-india",
+      readTime: "Coming soon",
+      status: "coming-soon",
     },
   ];
   
@@ -62,6 +64,7 @@ export default function Blog() {
 
     return (
         <div className="max-w-6xl mx-auto px-6 py-16">
+            <SEO {...pageSeo.insights} />
 
             {/* HERO */}
             <section className="mb-12">
@@ -115,18 +118,10 @@ export default function Blog() {
                             {featuredArticle.description}
                         </p>
 
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-slate-500">
-                                {featuredArticle.readTime}
+                        <div className="flex items-center">
+                            <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+                                Coming soon
                             </span>
-
-                            <Link
-                                to={`/insights/${featuredArticle.slug}`}
-                                className="text-slate-900 font-medium hover:underline"
-                            >
-                                Read Article →
-                            </Link>
-
                         </div>
                     </div>
 
@@ -135,25 +130,44 @@ export default function Blog() {
 
             {/* ARTICLE GRID */}
             <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredArticles.map((article) => (
-                    <Link
-                        key={article.slug}
-                        to={`/insights/${article.slug}`}
-                        className="group border border-slate-200 rounded-xl p-6 hover:border-slate-400 transition"
-                    >
-                        <p className="text-xs text-slate-500 mb-2">{article.category}</p>
+                {filteredArticles.map((article) => {
+                    const content = (
+                        <>
+                            <p className="text-xs text-slate-500 mb-2">{article.category}</p>
 
-                        <h3 className="text-lg font-semibold mb-3 group-hover:underline">
-                            {article.title}
-                        </h3>
+                            <h3 className={`text-lg font-semibold mb-3 ${article.status === "published" ? "group-hover:underline" : ""}`}>
+                                {article.title}
+                            </h3>
 
-                        <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                            {article.description}
-                        </p>
+                            <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                                {article.description}
+                            </p>
 
-                        <span className="text-sm text-slate-500">{article.readTime}</span>
-                    </Link>
-                ))}
+                            <span className="text-sm text-slate-500">{article.readTime}</span>
+                        </>
+                    );
+
+                    if (article.status === "published") {
+                        return (
+                            <Link
+                                key={article.slug}
+                                to={`/insights/${article.slug}`}
+                                className="group border border-slate-200 rounded-xl p-6 hover:border-slate-400 transition"
+                            >
+                                {content}
+                            </Link>
+                        );
+                    }
+
+                    return (
+                        <article
+                            key={article.title}
+                            className="border border-slate-200 rounded-xl p-6 bg-slate-50"
+                        >
+                            {content}
+                        </article>
+                    );
+                })}
             </section>
 
 

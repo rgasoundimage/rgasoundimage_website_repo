@@ -1,26 +1,21 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { Building2, Layers, AudioLines } from "lucide-react";
 import CtaBand from "../components/sections/CtaBand";
 import ValueCard from "../components/cards/ValueCard";
-import HeroMockup from "../components/sections/HeroMockup";
+import SEO from "../components/SEO";
+import { organizationJsonLd, pageSeo } from "../config/seo";
 
 
 
 const Home = () => {
-
-    useEffect(() => {
-      document.title =
-        "RGA Sound Image | Professional Cinema & Commercial Audio Solutions ";
-    }, []);
-  
     return (
     <div>
+      <SEO {...pageSeo.home} jsonLd={organizationJsonLd} />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Fixed background gradient (now behind the content) */}
@@ -35,8 +30,8 @@ const Home = () => {
         {/* Main hero content */}
         <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 pb-1">
           <div className="grid grid-cols-1">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+            <Motion.div
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="space-y-6"
@@ -64,7 +59,7 @@ const Home = () => {
     <AudioLines size={14} /> Dolby-Certified AV Integrators
   </span>
   
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
       </section>

@@ -6,13 +6,6 @@ export default function Chatbot() {
      ========================= */
 
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({
-    x: window.innerWidth - 80,
-    y: window.innerHeight - 80,
-  });
-  
-  const [isDragging, setIsDragging] = useState(false);
-  const dragOffset = useRef({ x: 0, y: 0 });  
   const [isCompleted, setIsCompleted] = useState(false);
   const [expecting, setExpecting] = useState(null); // "contact" | null
   const messagesEndRef = useRef(null);

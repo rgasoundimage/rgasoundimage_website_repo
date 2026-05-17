@@ -1,10 +1,11 @@
-import { useEffect } from "react";
 import ReactGA from "react-ga4";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SEO from "../components/SEO";
+import { pageSeo } from "../config/seo";
 
 // ⬇️ SAME HANDLER, WITH GA ADDED
 const handleWhatsAppAfterSubmit = async (e) => {
@@ -54,12 +55,10 @@ ${payload.message}`
 
 
 export default function Contact() {
-  useEffect(() => {
-    document.title = "Contact RGA Sound Image | AV Solutions India";
-  }, []);
-
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
+      <SEO {...pageSeo.contact} />
+
       <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-center max-w-2xl mx-auto">
         Contact
       </h1>
@@ -92,4 +91,3 @@ export default function Contact() {
     </section>
   );
 }
-

@@ -1,16 +1,13 @@
-import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND } from "../config/brand";
 import Stat from "../components/common/Stat";
+import SEO from "../components/SEO";
+import { pageSeo } from "../config/seo";
 
 const About = () => {
-  useEffect(() => {
-    document.title =
-      "About RGA Sound Image – Dolby-Certified Audio Experts in Andhra Pradesh & Telangana";
-  }, []);
-
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16 space-y-12">
+      <SEO {...pageSeo.about} />
 
       {/* Header */}
       <div className="space-y-4 max-w-4xl">

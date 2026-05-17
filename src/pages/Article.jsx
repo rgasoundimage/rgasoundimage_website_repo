@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { articles } from "../content/articles";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/SEO";
 
 
 export default function Article() {
@@ -18,15 +18,12 @@ export default function Article() {
   
   return (
     <>
-  <Helmet>
-    <title>{article.title} | RGA Sound Image</title>
-    <meta
-      name="description"
-      content={article.intro}
-    />
-    <meta property="og:title" content={article.title} />
-    <meta property="og:description" content={article.intro} />
-  </Helmet>
+  <SEO
+    title={`${article.title} | RGA Sound Image`}
+    description={article.intro}
+    path={`/insights/${slug}`}
+    type="article"
+  />
 
     <article className="max-w-3xl mx-auto px-6 py-16">
 
