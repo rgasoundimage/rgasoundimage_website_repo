@@ -1,11 +1,17 @@
 import ProjectCard from "../components/cards/ProjectCard";
 import SEO from "../components/SEO";
-import { pageSeo } from "../config/seo";
+import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
 
 const Projects = () => {
     return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
-      <SEO {...pageSeo.projects} />
+      <SEO
+        {...pageSeo.projects}
+        jsonLd={createBreadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Projects", path: "/projects" },
+        ])}
+      />
 
       <div className="mb-8 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-semibold mb-2">Projects</h1>

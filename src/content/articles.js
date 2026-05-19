@@ -1,6 +1,8 @@
 export const articles = {
     "fix-auditorium-echo": {
       title: "Fixing Echo in Large Auditoriums",
+      datePublished: "2026-05-01",
+      dateModified: "2026-05-18",
       intro:
         "Speech echo in auditoriums is usually caused by late reflections from walls and ceilings rather than insufficient speaker volume.",
   
@@ -28,6 +30,8 @@ export const articles = {
   
     "dolby-atmos-vs-7-1": {
       title: "Dolby Atmos vs 7.1 — What Actually Matters",
+      datePublished: "2026-05-01",
+      dateModified: "2026-05-18",
       intro:
         "The real difference between Atmos and 7.1 is coverage consistency, not just speaker count.",
   

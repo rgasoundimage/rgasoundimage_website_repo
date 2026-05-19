@@ -50,11 +50,15 @@ export const pageSeo = {
 export const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
+  "@id": `${SITE_URL}/#organization`,
   name: "RGA Sound Image",
+  alternateName: "RGA Sound Image AV Integrators",
   url: SITE_URL,
   logo: `${SITE_URL}/RGAlogo.png`,
   image: `${SITE_URL}/RGAlogo.png`,
-  telephone: "+917981035920",
+  description: DEFAULT_SEO.description,
+  foundingDate: "1995",
+  telephone: ["+917981035920", "+919849001016"],
   email: "contact@rgasoundimage.com",
   address: {
     "@type": "PostalAddress",
@@ -76,3 +80,53 @@ export const organizationJsonLd = {
     "Dolby calibration",
   ],
 };
+
+export const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  name: "RGA Sound Image",
+  url: SITE_URL,
+  publisher: {
+    "@id": `${SITE_URL}/#organization`,
+  },
+};
+
+export function createBreadcrumbJsonLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path === "/" ? "" : item.path}`,
+    })),
+  };
+}
+
+export function createArticleJsonLd({ slug, article }) {
+  const path = `/insights/${slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.intro,
+    url: `${SITE_URL}${path}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}${path}`,
+    },
+    author: {
+      "@type": "Organization",
+      name: "RGA Sound Image",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@id": `${SITE_URL}/#organization`,
+    },
+    datePublished: article.datePublished,
+    dateModified: article.dateModified || article.datePublished,
+  };
+}

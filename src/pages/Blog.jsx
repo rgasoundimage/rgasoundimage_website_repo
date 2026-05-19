@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
-import { pageSeo } from "../config/seo";
+import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
 
 
 const categories = [
@@ -64,7 +64,13 @@ export default function Blog() {
 
     return (
         <div className="max-w-6xl mx-auto px-6 py-16">
-            <SEO {...pageSeo.insights} />
+            <SEO
+                {...pageSeo.insights}
+                jsonLd={createBreadcrumbJsonLd([
+                    { name: "Home", path: "/" },
+                    { name: "Insights", path: "/insights" },
+                ])}
+            />
 
             {/* HERO */}
             <section className="mb-12">

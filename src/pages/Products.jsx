@@ -1,14 +1,20 @@
 import CatalogItem from "../components/common/CatalogItem";
 import ProductCard from "../components/cards/ProductCard";
 import SEO from "../components/SEO";
-import { pageSeo } from "../config/seo";
+import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
 
 
 
 const Products = () => {
     return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
-      <SEO {...pageSeo.products} />
+      <SEO
+        {...pageSeo.products}
+        jsonLd={createBreadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Products", path: "/products" },
+        ])}
+      />
 
       <div className="mb-10 max-w-4xl space-y-5">
     <h1 className="text-3xl md:text-4xl font-semibold">Products</h1>

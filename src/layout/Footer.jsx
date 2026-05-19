@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
 import Logo from "../components/common/Logo";
 
 export default function Footer() {
@@ -29,23 +29,33 @@ export default function Footer() {
   </div>
   
       {/* RIGHT — Contact */}
-        <div className="text-sm text-slate-600 space-y-2 md:text-right">
+        <address className="not-italic text-sm text-slate-600 space-y-2 md:text-right">
           {/* Heading — match Quick Links */}
           <p className="font-medium mb-3 text-base text-slate-900">
-            Contact
+            RGA Sound Image
           </p>
   
           {/* Content — keep existing size */}
-          <p className="flex items-center gap-2 md:justify-end">
-            <Phone size={16} /> +917981035920; +919849001016
+          <p className="text-slate-600">
+            Hyderabad, Telangana, India
           </p>
           <p className="flex items-center gap-2 md:justify-end">
-            <Mail size={16} /> contact@rgasoundimage.com
+            <Phone size={16} />
+            <a href="tel:+917981035920" className="hover:text-slate-900">
+              +91 79810 35920
+            </a>
+            <span aria-hidden="true">/</span>
+            <a href="tel:+919849001016" className="hover:text-slate-900">
+              +91 98490 01016
+            </a>
           </p>
           <p className="flex items-center gap-2 md:justify-end">
-            <MapPin size={16} /> Hyderabad, Telangana, India
+            <Mail size={16} />
+            <a href="mailto:contact@rgasoundimage.com" className="hover:text-slate-900">
+              contact@rgasoundimage.com
+            </a>
           </p>
-        </div>
+        </address>
     </div>
   
     {/* Bottom footer row */}

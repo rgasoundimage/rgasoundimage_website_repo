@@ -2,12 +2,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND } from "../config/brand";
 import Stat from "../components/common/Stat";
 import SEO from "../components/SEO";
-import { pageSeo } from "../config/seo";
+import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
 
 const About = () => {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16 space-y-12">
-      <SEO {...pageSeo.about} />
+      <SEO
+        {...pageSeo.about}
+        jsonLd={createBreadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ])}
+      />
 
       {/* Header */}
       <div className="space-y-4 max-w-4xl">

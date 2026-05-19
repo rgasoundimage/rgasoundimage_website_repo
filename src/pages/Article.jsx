@@ -1,6 +1,10 @@
 import { useParams } from "react-router-dom";
 import { articles } from "../content/articles";
 import SEO from "../components/SEO";
+import {
+  createArticleJsonLd,
+  createBreadcrumbJsonLd,
+} from "../config/seo";
 
 
 export default function Article() {
@@ -23,6 +27,14 @@ export default function Article() {
     description={article.intro}
     path={`/insights/${slug}`}
     type="article"
+    jsonLd={[
+      createBreadcrumbJsonLd([
+        { name: "Home", path: "/" },
+        { name: "Insights", path: "/insights" },
+        { name: article.title, path: `/insights/${slug}` },
+      ]),
+      createArticleJsonLd({ slug, article }),
+    ]}
   />
 
     <article className="max-w-3xl mx-auto px-6 py-16">

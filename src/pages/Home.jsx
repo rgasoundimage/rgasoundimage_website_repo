@@ -7,14 +7,14 @@ import { Building2, Layers, AudioLines } from "lucide-react";
 import CtaBand from "../components/sections/CtaBand";
 import ValueCard from "../components/cards/ValueCard";
 import SEO from "../components/SEO";
-import { organizationJsonLd, pageSeo } from "../config/seo";
+import { organizationJsonLd, pageSeo, websiteJsonLd } from "../config/seo";
 
 
 
 const Home = () => {
     return (
     <div>
-      <SEO {...pageSeo.home} jsonLd={organizationJsonLd} />
+      <SEO {...pageSeo.home} jsonLd={[organizationJsonLd, websiteJsonLd]} />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
