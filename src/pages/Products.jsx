@@ -1,8 +1,23 @@
 import CatalogItem from "../components/common/CatalogItem";
 import ProductCard from "../components/cards/ProductCard";
 import SEO from "../components/SEO";
-import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
+import {
+  createBreadcrumbJsonLd,
+  createStonewaterServiceJsonLd,
+  pageSeo,
+} from "../config/seo";
 
+const telanganaCities = ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"];
+const andhraPradeshCities = [
+  "Visakhapatnam",
+  "Vijayawada",
+  "Guntur",
+  "Tirupati",
+  "Nellore",
+  "Kurnool",
+  "Rajahmundry",
+  "Kakinada",
+];
 
 
 const Products = () => {
@@ -10,10 +25,13 @@ const Products = () => {
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
       <SEO
         {...pageSeo.products}
-        jsonLd={createBreadcrumbJsonLd([
-          { name: "Home", path: "/" },
-          { name: "Products", path: "/products" },
-        ])}
+        jsonLd={[
+          createBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+          ]),
+          createStonewaterServiceJsonLd(),
+        ]}
       />
 
       <div className="mb-10 max-w-4xl space-y-5">
@@ -77,6 +95,53 @@ const Products = () => {
       </div>
     </div>
   </div>
+
+  <section className="mb-16 border-y border-slate-200 py-10">
+    <div className="max-w-4xl space-y-4">
+      <p className="text-lg font-semibold text-slate-900">
+        Stonewater Audio supply and integration across AP & Telangana
+      </p>
+      <p className="text-sm leading-6 text-slate-600">
+        As an authorized Stonewater Audio distributor for Andhra Pradesh and Telangana,
+        RGA Sound Image supports system design, product supply, installation, and
+        calibration for cinema and commercial AV projects across the key cities below.
+      </p>
+    </div>
+
+    <div className="mt-6 grid gap-6 md:grid-cols-2">
+      <div>
+        <p className="text-sm font-medium text-slate-900 mb-3">
+          Telangana
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {telanganaCities.map((city) => (
+            <span
+              key={city}
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"
+            >
+              Stonewater Audio {city}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-medium text-slate-900 mb-3">
+          Andhra Pradesh
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {andhraPradeshCities.map((city) => (
+            <span
+              key={city}
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"
+            >
+              Stonewater Audio {city}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
 
 
   {/* PRODUCTS GRID */}

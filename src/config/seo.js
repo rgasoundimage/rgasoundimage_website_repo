@@ -23,9 +23,9 @@ export const pageSeo = {
   products: {
     path: "/products",
     title:
-      "Cinema, Commercial & Professional Audio Products | RGA Sound Image",
+      "Stonewater Audio, Cinema & Commercial AV Products | RGA Sound Image",
     description:
-      "Explore cinema systems, commercial speakers, amplifiers, DSP, microphones, projection, displays, cabling, and AV products from Stonewater Audio, JBL, Yamaha, Dolby, Onkyo, and more.",
+      "Explore Stonewater Audio, cinema systems, commercial speakers, amplifiers, DSP, microphones, projection, displays, cabling, and AV products for Hyderabad, Telangana, and Andhra Pradesh.",
   },
   projects: {
     path: "/projects",
@@ -68,7 +68,18 @@ export const organizationJsonLd = {
   },
   areaServed: [
     "Hyderabad",
+    "Warangal",
+    "Nizamabad",
+    "Karimnagar",
     "Telangana",
+    "Visakhapatnam",
+    "Vijayawada",
+    "Guntur",
+    "Tirupati",
+    "Nellore",
+    "Kurnool",
+    "Rajahmundry",
+    "Kakinada",
     "Andhra Pradesh",
     "India",
   ],
@@ -80,6 +91,50 @@ export const organizationJsonLd = {
     "Dolby calibration",
   ],
 };
+
+export function createStonewaterServiceJsonLd() {
+  const serviceCities = [
+    "Hyderabad",
+    "Warangal",
+    "Nizamabad",
+    "Karimnagar",
+    "Visakhapatnam",
+    "Vijayawada",
+    "Guntur",
+    "Tirupati",
+    "Nellore",
+    "Kurnool",
+    "Rajahmundry",
+    "Kakinada",
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Stonewater Audio distribution and AV integration",
+    alternateName: [
+      "Stone Water Audio",
+      "Stone Water Hyderabad",
+      "Stone Water Visakhapatnam",
+      "Stone Water Vijayawada",
+      "Stone Water Guntur",
+      "Stone Water Warangal",
+    ],
+    provider: {
+      "@id": `${SITE_URL}/#organization`,
+    },
+    brand: {
+      "@type": "Brand",
+      name: "Stonewater Audio",
+    },
+    serviceType: "Professional audio product supply and AV integration",
+    areaServed: serviceCities.map((city) => ({
+      "@type": "City",
+      name: city,
+    })),
+    url: `${SITE_URL}/products`,
+  };
+}
 
 export const websiteJsonLd = {
   "@context": "https://schema.org",
