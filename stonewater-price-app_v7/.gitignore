@@ -1,0 +1,17 @@
+# Dependencies / tooling
+node_modules/
+.netlify/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Python noise (from running build_prices.py locally)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# NOTE: prices.json is intentionally committed — it is the data the app serves.
+# NOTE: the source .xlsx files in data/ are intentionally committed too, so the
+#       catalogue is reproducible by anyone who clones the repo.

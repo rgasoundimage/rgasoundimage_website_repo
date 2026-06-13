@@ -1,0 +1,32 @@
+# Netlify config for the Stonewater / RGA price app.
+# This file lives INSIDE the app subfolder. In the Netlify site settings,
+# set "Base directory" to:  stonewater-price-app
+# Netlify then reads this file, and the paths below are relative to that base.
+
+[build]
+  # Publish the static app folder.
+  publish = "site"
+  # The only build step: stamp a fresh service-worker cache version
+  # (from the commit SHA) so redeploys are never stale. No Python needed here —
+  # prices.json is generated locally and committed.
+  command = "node scripts/stamp-cache.mjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Long-cache the immutable icons; never hard-cache the app shell or data,
+# the service worker handles offline. (Safe defaults; tweak if you like.)
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/prices.json"
+  [headers.values]
+    Cache-Control = "no-cache"
