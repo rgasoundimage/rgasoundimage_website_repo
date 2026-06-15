@@ -1,5 +1,14 @@
 import nodemailer from "nodemailer";
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return {
@@ -36,11 +45,11 @@ export async function handler(event) {
       subject: `New Contact Form Enquiry – ${name}`,
       html: `
         <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone || "N/A")}</p>
         <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, "<br/>")}</p>
+        <p>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
       `,
     };
 

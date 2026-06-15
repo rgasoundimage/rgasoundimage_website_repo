@@ -1,5 +1,14 @@
 import nodemailer from "nodemailer";
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function handler(event) {
   // Only allow POST
   if (event.httpMethod !== "POST") {
@@ -38,10 +47,10 @@ export async function handler(event) {
       subject: `New Website Lead – ${enquiryType}`,
       html: `
         <h2>New Lead from Website Chatbot</h2>
-        <p><strong>Enquiry Type:</strong> ${enquiryType}</p>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Enquiry Type:</strong> ${escapeHtml(enquiryType)}</p>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
       `,
     };
 
