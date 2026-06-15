@@ -1,3 +1,4 @@
+import { useState } from "react";
 import ReactGA from "react-ga4";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,55 +8,59 @@ import { Textarea } from "@/components/ui/textarea";
 import SEO from "../components/SEO";
 import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
 
-// ⬇️ SAME HANDLER, WITH GA ADDED
-const handleWhatsAppAfterSubmit = async (e) => {
-  e.preventDefault();
+export default function Contact() {
+  const [status, setStatus] = useState("idle"); // "idle" | "loading" | "success" | "error"
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // 🔹 GA4 event
-  ReactGA.event({
-    category: "Form",
-    action: "contact_form_submit",
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMessage("");
 
-  const form = e.target;
+    ReactGA.event({ category: "Form", action: "contact_form_submit" });
 
-  const payload = {
-    name: form.name.value,
-    email: form.email.value,
-    phone: form.phone.value,
-    message: form.message.value,
-    _honey: form._honey.value,
+    const form = e.target;
+    const payload = {
+      name: form.name.value,
+      email: form.email.value,
+      phone: form.phone.value,
+      message: form.message.value,
+      _honey: form._honey.value,
+    };
+
+    try {
+      const res = await fetch("/.netlify/functions/sendcontact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        setStatus("error");
+        setErrorMessage(
+          res.status === 429
+            ? "Too many submissions. Please wait a minute and try again."
+            : "Something went wrong on our end. Please try again or call us directly."
+        );
+        return;
+      }
+
+      // Success — confirm to user before opening WhatsApp
+      form.reset();
+      setStatus("success");
+
+      const whatsappText = encodeURIComponent(
+        `Hi RGA Sound Image,\n\nName: ${payload.name}\nEmail: ${payload.email}\nPhone: ${payload.phone}\n\nMessage:\n${payload.message}`
+      );
+      window.open(`https://wa.me/917981035920?text=${whatsappText}`, "_blank");
+    } catch {
+      setStatus("error");
+      setErrorMessage(
+        "Could not reach the server. Please check your connection and try again."
+      );
+    }
   };
 
-  // 🔹 Send email via Netlify Function (Gmail SMTP)
-  await fetch("/.netlify/functions/sendcontact", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  // 🔹 WhatsApp redirect
-  const whatsappText = encodeURIComponent(
-    `Hi RGA Sound Image,
-
-Name: ${payload.name}
-Email: ${payload.email}
-Phone: ${payload.phone}
-
-Message:
-${payload.message}`
-  );
-
-  window.open(
-    `https://wa.me/917981035920?text=${whatsappText}`,
-    "_blank"
-  );
-
-  form.reset();
-};
-
-
-export default function Contact() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-16">
       <SEO
@@ -77,30 +82,71 @@ export default function Contact() {
           </CardHeader>
 
           <CardContent>
-            <form className="space-y-4" onSubmit={handleWhatsAppAfterSubmit}>
-              {/* Honeypot — hidden from humans, traps bots that fill every field */}
-              <input
-                name="_honey"
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                aria-hidden="true"
-                style={{ display: "none" }}
-              />
-              <Input name="name" placeholder="Your name" required />
-              <Input name="email" type="email" placeholder="Email" required />
-              <Input name="phone" placeholder="Phone" />
-              <Textarea
-                name="message"
-                placeholder="Tell us about your project"
-                rows={5}
-                required
-              />
+            {status === "success" ? (
+              <div className="py-8 text-center space-y-2">
+                <p className="text-lg font-medium text-slate-900">Message sent!</p>
+                <p className="text-sm text-slate-600">
+                  We have received your enquiry. WhatsApp is opening so you can follow up directly with our team.
+                </p>
+                <button
+                  className="mt-4 text-sm text-slate-500 underline"
+                  onClick={() => setStatus("idle")}
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                {/* Honeypot — hidden from humans, traps bots that fill every field */}
+                <input
+                  name="_honey"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ display: "none" }}
+                />
+                <Input
+                  name="name"
+                  placeholder="Your name"
+                  required
+                  disabled={status === "loading"}
+                />
+                <Input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  required
+                  disabled={status === "loading"}
+                />
+                <Input
+                  name="phone"
+                  placeholder="Phone"
+                  disabled={status === "loading"}
+                />
+                <Textarea
+                  name="message"
+                  placeholder="Tell us about your project"
+                  rows={5}
+                  required
+                  disabled={status === "loading"}
+                />
 
-              <Button type="submit" className="rounded-2xl">
-                Submit
-              </Button>
-            </form>
+                {status === "error" && (
+                  <p className="text-sm text-red-600" role="alert">
+                    {errorMessage}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  className="rounded-2xl"
+                  disabled={status === "loading"}
+                >
+                  {status === "loading" ? "Sending..." : "Submit"}
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>
