@@ -9,12 +9,37 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+// In-memory rate limiter — 5 submissions per IP per 60 seconds (per warm instance)
+const rateMap = new Map();
+const RATE_LIMIT = 5;
+const WINDOW_MS = 60_000;
+
+function isRateLimited(event) {
+  const ip =
+    (event.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+    event.headers["client-ip"] ||
+    "unknown";
+  const now = Date.now();
+  const hits = (rateMap.get(ip) || []).filter((t) => now - t < WINDOW_MS);
+  if (hits.length >= RATE_LIMIT) return true;
+  rateMap.set(ip, [...hits, now]);
+  return false;
+}
+
 export async function handler(event) {
   // Only allow POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
       body: "Method Not Allowed",
+    };
+  }
+
+  if (isRateLimited(event)) {
+    return {
+      statusCode: 429,
+      headers: { "Retry-After": "60" },
+      body: JSON.stringify({ error: "Too many requests. Please try again later." }),
     };
   }
 

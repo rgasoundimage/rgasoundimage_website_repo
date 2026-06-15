@@ -24,6 +24,7 @@ const handleWhatsAppAfterSubmit = async (e) => {
     email: form.email.value,
     phone: form.phone.value,
     message: form.message.value,
+    _honey: form._honey.value,
   };
 
   // 🔹 Send email via Netlify Function (Gmail SMTP)
@@ -77,6 +78,15 @@ export default function Contact() {
 
           <CardContent>
             <form className="space-y-4" onSubmit={handleWhatsAppAfterSubmit}>
+              {/* Honeypot — hidden from humans, traps bots that fill every field */}
+              <input
+                name="_honey"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ display: "none" }}
+              />
               <Input name="name" placeholder="Your name" required />
               <Input name="email" type="email" placeholder="Email" required />
               <Input name="phone" placeholder="Phone" />
