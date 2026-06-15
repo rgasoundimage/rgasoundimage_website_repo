@@ -9,7 +9,7 @@ export default function Chatbot() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [expecting, setExpecting] = useState(null); // "contact" | null
   const messagesEndRef = useRef(null);
-  const lastActivityRef = useRef(Date.now());
+  const timeoutRef = useRef(null);
 
   const [formData, setFormData] = useState({
     enquiryType: "",
@@ -40,21 +40,10 @@ export default function Chatbot() {
   }, [messages]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const lastActivity = lastActivityRef.current;
-  
-      // 1 minute = 60,000 ms
-      if (
-        isOpen &&
-        !isCompleted &&
-        now - lastActivity > 60000
-      ) {
-        resetChatbot();
-      }
-    }, 1000); // check every second
-  
-    return () => clearInterval(interval);
+    if (isOpen && !isCompleted) {
+      timeoutRef.current = setTimeout(resetChatbot, 60_000);
+    }
+    return () => clearTimeout(timeoutRef.current);
   }, [isOpen, isCompleted]);
   
 
@@ -62,8 +51,15 @@ export default function Chatbot() {
      3. HANDLERS
      ========================= */
 
+  const resetInactivityTimer = () => {
+    clearTimeout(timeoutRef.current);
+    if (isOpen && !isCompleted) {
+      timeoutRef.current = setTimeout(resetChatbot, 60_000);
+    }
+  };
+
   const handleButtonClick = (option) => {
-    lastActivityRef.current = Date.now();
+    resetInactivityTimer();
 
     setMessages((prev) => {
       const updated = [...prev];
@@ -96,7 +92,7 @@ export default function Chatbot() {
   };
 
   const handleSend = () => {
-    lastActivityRef.current = Date.now();
+    resetInactivityTimer();
 
     const { name, email, phone } = formData;
 
@@ -290,7 +286,7 @@ export default function Chatbot() {
                       placeholder="Your name"
                       value={formData.name}
                       onChange={(e) => {
-                        lastActivityRef.current = Date.now();
+                        resetInactivityTimer();
                         setFormData((prev) => ({
                           ...prev,
                           name: e.target.value,
@@ -304,7 +300,7 @@ export default function Chatbot() {
                       placeholder="Your email"
                       value={formData.email}
                       onChange={(e) => {
-                        lastActivityRef.current = Date.now();
+                        resetInactivityTimer();
                         setFormData((prev) => ({
                           ...prev,
                           email: e.target.value,
@@ -318,7 +314,7 @@ export default function Chatbot() {
                       placeholder="Your phone number"
                       value={formData.phone}
                       onChange={(e) => {
-                        lastActivityRef.current = Date.now();
+                        resetInactivityTimer();
                         setFormData((prev) => ({
                           ...prev,
                           phone: e.target.value,
