@@ -29,6 +29,20 @@ The `site/` folder is the deployable app. Everything outside it is tooling.
 
 ---
 
+## Quote Builder (internal)
+
+The app has two tabs: **Catalogue** (browse/search prices) and **Quote**. The
+Quote tool is internal — it sits behind the same passcode as the Dealer/Internal
+views. It lets you assemble an ad-hoc, mixed-brand quote: add products, enter a
+custom price and quantity per line, and pick what each line compares against
+(**Retail** = MSRP/MRP, or **Dealer**). It shows the ₹ gap and **profit margin %**
+per line and across the whole quote. Quotes are **in-memory only** — nothing is
+saved and they don't survive a reload. There is no client-facing output; it's an
+internal pricing aid. To change the passcode, edit `PASSCODE` near the top of
+`site/app.js`.
+
+---
+
 ## Everyday workflow (VS Code → commit → push → Netlify deploys)
 
 This mirrors how the rest of the `rgasoundimage` repo works.

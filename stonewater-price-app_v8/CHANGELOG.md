@@ -6,6 +6,34 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.2.0] — Quote Builder (internal) — 2026-06-20 · cache `stonewater-<commitSHA>`
+Adds an internal quote-building tool alongside the catalogue. Front-end only;
+no data-model or `prices.json` changes.
+
+### Added
+- **Quote tab** — a Catalogue / Quote switcher under the level meter. The Quote
+  tool is **internal**, gated behind the existing passcode (same one as the
+  Dealer/Internal views). Locked until unlocked; relocking bounces back to Catalogue.
+- **Quote Builder**:
+  - **Add product** picker that searches across **both brands** (public lists);
+    tap to add, add several in one go.
+  - Per line: a **Compare-to** selector (**Retail** = MSRP/MRP per brand, or
+    **Dealer**), the resolved baseline, a **custom unit price**, and **quantity**.
+  - Per line: **line total**, **margin ₹**, and **margin %** (profit margin =
+    `(price − baseline) ÷ price`), colour-coded (green positive / red negative).
+  - **Mixed-brand quotes** (Stonewater + Kasper together) in one total.
+  - **Summary bar**: total at your prices, total baseline, **total margin ₹** and
+    **blended margin %** (computed on totals).
+  - Un-priced lines are excluded from totals until a price is entered.
+  - **In-memory only** — one working quote; nothing is saved and it does not
+    survive a reload. No client-facing/export output (internal concept).
+
+### Notes
+- No passcode/role/data changes. Files touched: `site/index.html`, `site/app.js`,
+  `site/styles.css`.
+
+---
+
 ## [2.1.0] — Repo + Git/Netlify deploy — 2026-06-13 · cache `stonewater-<commitSHA>`
 Infrastructure release. No app-behaviour changes; restructured for version
 control and continuous deployment from the `rgasoundimage` repo.
