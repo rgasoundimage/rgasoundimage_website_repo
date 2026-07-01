@@ -594,7 +594,13 @@ function updateSummary() {
 }
 
 /* ----- mutations ----- */
+// A product is identified by brand + model. One line per product:
+// re-adding is a no-op (use the Qty field for multiples).
+function inQuote(prod) {
+  return quote.some((l) => l.brandId === prod.brandId && l.model === prod.model);
+}
 function addLine(prod) {
+  if (inQuote(prod)) return false;            // no duplicate lines
   const basis = Number.isFinite(prod.retail) ? "retail" : "dealer";
   quote.push({
     uid: "q" + (++uidSeq),
@@ -604,6 +610,8 @@ function addLine(prod) {
     basis, price: "", qty: 1,
   });
   renderQuote();
+  if (!$("picker").hidden) renderPickResults($("pickSearch").value);   // refresh "Added" marks
+  return true;
 }
 function clearQuote() {
   if (!quote.length) return;
@@ -659,14 +667,17 @@ function renderPickResults(q) {
   }
   const shown = items.slice(0, 80);
   $("pickResults").innerHTML = shown.length
-    ? shown.map((p, i) => {
+    ? shown.map((p) => {
         const idx = PRODUCT_INDEX.indexOf(p);
-        return `<button class="pickrow" data-idx="${idx}">
+        const added = inQuote(p);
+        return `<button class="pickrow ${added ? "added" : ""}" data-idx="${idx}">
           <span class="pickinfo">
             <span class="pickmodel">${esc(p.model)}</span>
             ${p.description ? `<span class="pickdesc">${esc(p.description)}</span>` : ""}
           </span>
-          <span class="picktag">${esc(p.brandName)}</span>
+          ${added
+            ? `<span class="pickcheck">✓ Added</span>`
+            : `<span class="picktag">${esc(p.brandName)}</span>`}
         </button>`;
       }).join("")
     : `<div class="qempty">No matches.</div>`;
@@ -677,9 +688,14 @@ $("pickResults").addEventListener("click", (e) => {
   if (!row) return;
   const prod = PRODUCT_INDEX[parseInt(row.dataset.idx, 10)];
   if (!prod) return;
-  addLine(prod);
   const added = $("pickAdded");
-  added.textContent = `Added ${prod.model} (${prod.brandName})`;
+  if (addLine(prod)) {
+    added.textContent = `Added ${prod.model} (${prod.brandName})`;
+    added.className = "pickadded";
+  } else {
+    added.textContent = `${prod.model} is already in the quote — adjust its Qty instead.`;
+    added.className = "pickadded warn";
+  }
   added.hidden = false;
 });
 $("pickDone").addEventListener("click", closePicker);

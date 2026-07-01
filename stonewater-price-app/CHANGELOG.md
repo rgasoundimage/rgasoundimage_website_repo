@@ -6,6 +6,21 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.2.1] — Quote Builder: no duplicate lines — 2026-06-23 · cache `stonewater-<commitSHA>`
+Bug fix (see `BUGS.md` → BUG-001).
+
+### Fixed
+- Adding the same product to a quote no longer creates duplicate lines. One line
+  per product; use the line's **Qty** field for multiples.
+- The product picker now marks already-added products with a dimmed **✓ Added**
+  state (not re-addable), and re-tapping shows an amber "already in the quote —
+  adjust its Qty instead" notice. Removing a line frees the product to be re-added.
+
+### Added
+- **`BUGS.md`** — a lightweight bug log (this is the first entry).
+
+---
+
 ## [2.2.0] — Quote Builder (internal) — 2026-06-20 · cache `stonewater-<commitSHA>`
 Adds an internal quote-building tool alongside the catalogue. Front-end only;
 no data-model or `prices.json` changes.
