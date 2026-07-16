@@ -22,6 +22,14 @@ const featuredArticle = {
 
   const articles = [
     {
+      title: "The Stonewater SR200: The Commercial Amplifier That Solves the Subwoofer Problem",
+      category: "Commercial AV",
+      description: "How a built-in passive subwoofer output and active crossover let a 2.1 amplifier outperform higher-wattage stereo systems in cafés, gyms and restaurants.",
+      readTime: "8 min read",
+      slug: "stonewater-sr200",
+      status: "published",
+    },
+    {
       title: "Dolby Atmos vs 7.1 — What Actually Matters",
       category: "Cinema",
       description: "Understanding practical differences in real theatre installations, not marketing specs.",

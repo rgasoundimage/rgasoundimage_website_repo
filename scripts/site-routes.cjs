@@ -31,6 +31,10 @@ const routes = [
     path: "/insights/dolby-atmos-vs-7-1",
     priority: "0.8",
   },
+  {
+    path: "/insights/stonewater-sr200",
+    priority: "0.8",
+  },
 ];
 
 module.exports = { routes };
