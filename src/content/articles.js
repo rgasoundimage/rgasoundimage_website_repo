@@ -1,4 +1,186 @@
 export const articles = {
+    "why-restaurants-sound-bad": {
+      title: "Why Great-Looking Restaurants Still Sound Bad",
+      datePublished: "2026-07-20",
+      dateModified: "2026-07-20",
+      intro:
+        "Beautiful restaurant, great lighting, good food, and by the time your drinks arrive you're leaning across the table just to hear the person next to you. That's not bad luck. It's what happens when a restaurant budgets for everything except sound.",
+
+      body: [
+        { type: "heading", text: "Why it happens" },
+        {
+          type: "paragraph",
+          text: "Most fit-outs never bring anyone in to plan the sound. It gets left to whichever contractor is handling the electrical work: a few ceiling speakers, a basic amplifier, wired in during the last week before opening. Meanwhile, everything else about the room — hard floors, glass, exposed ceilings, a bar sharing the same air as the dining room — is working against good sound without anyone noticing. The result is a feedback loop: the room gets loud, the music goes up to compete with it, and the room gets louder still.",
+        },
+        {
+          type: "paragraph",
+          text: "We see this pattern often. Lili Cantonese Kitchen in Jubilee Hills is a good example of the layout itself, not because anyone measured its sound and found it lacking, but because a small, striking space (about 1,000 sq. ft., 45 seats, reached by a staircase, with a bar sharing the room with the dining tables) is exactly the kind of brief where sound needs to be planned in from day one, not added afterward.",
+        },
+        {
+          type: "paragraph",
+          text: "It's not a small thing either. Diner surveys consistently find that noise is the single most common complaint about restaurants, ahead of slow service and even food quality. A room can look perfect and still lose the guest.",
+        },
+
+        { type: "heading", text: "What actually fixes it" },
+        { type: "paragraph", text: "Two things, done together:" },
+        {
+          type: "list",
+          items: [
+            { bold: "Treating the room.", text: "Soft materials, upholstery, drapery, acoustic panels worked into the decor, that absorb sound instead of letting it bounce endlessly off hard surfaces." },
+            { bold: "Designing the system properly.", text: "Separate volume control for the bar and the dining room, speakers placed for even coverage instead of hot spots and dead corners, and an amplifier that's never straining to be heard." },
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "Done well, guests don't consciously notice any of it. They just find they can talk normally, and the background music actually stays in the background.",
+        },
+
+        { type: "heading", text: "Where RGA Sound Image comes in" },
+        {
+          type: "paragraph",
+          text: "This is what we've done since 1995: design, supply, installation, and calibration for cinema, commercial, and hospitality sound, to Dolby-certified standards. We work across trusted brands including Stonewater, Fonestar, ELAC, JBL, and Yamaha, and every project starts with the room, not a product catalogue.",
+        },
+
+        { type: "heading", text: "What does my space actually need?" },
+        {
+          type: "list",
+          items: [
+            { bold: "A small café or shop:", text: "a handful of discreet ceiling speakers and one compact amplifier. Enough for even background music without anyone noticing the equipment is there." },
+            { bold: "A mid-size restaurant with a bar:", text: "two separate zones, one for the dining room, one for the bar, each with its own volume and its own character. This is the setup a space like Lili's is built for." },
+            { bold: "A large or multi-level venue:", text: "several zones working together, main dining, an outdoor or rooftop area, and a bar or lounge on its own loop, so the energy in one corner never drowns out the conversation in another." },
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "The exact speaker count, amplifier, and brand always get sized to your actual room during a site visit; what's above is the shape of it, not a fixed price list.",
+        },
+        {
+          type: "callout",
+          text: "The short version: a restaurant that looks extraordinary and sounds like a subway platform isn't a design failure. It's a budgeting one.",
+        },
+        {
+          type: "paragraph",
+          text: "Want to see exactly what goes into each setup, real products, real specs, real comparisons? Keep reading below.",
+        },
+
+        { type: "heading", text: "The technical breakdown: real products, real specs" },
+        {
+          type: "paragraph",
+          text: "This is the detail behind the three tiers above: the actual speakers, amplifiers, and combinations we spec, with the numbers, for anyone comparing options.",
+        },
+
+        { type: "subheading", text: "Small café or quick-service space (single zone, up to ~800 sq. ft.)" },
+        {
+          type: "table",
+          headers: ["Component", "Model", "Key specifications"],
+          rows: [
+            ["Ceiling speakers (×4)", "Stonewater CS-4LM", "12W nominal / 6W RMS, 61Hz–20kHz, 8Ω, 89dB SPL, 147mm cutout, 1.5kg"],
+            ["Mixer amplifier (×1)", "Stonewater SMX60", "60W RMS @ 8Ω/100V, <0.5% THD, built-in Bluetooth/USB/SD/FM, 2 mic + 2 line inputs, 11.65kg"],
+          ],
+        },
+        {
+          type: "paragraph",
+          bold: "Alternative line:",
+          text: "Fonestar GAT-4507 6\" ceiling speakers (7W RMS @ 100V, 110Hz–15kHz, 90dB sensitivity) on a Fonestar PROX-120S amplifier (120W RMS, 100V/4Ω output, 3 phantom-powered mic inputs, <1% THD). Same job, different brand, useful when lead time or budget on one line makes the other the better call.",
+        },
+
+        { type: "subheading", text: "Mid-size restaurant with dining + bar (two zones, ~1,500–2,500 sq. ft.)" },
+        { type: "subheading", text: "Dining zone" },
+        {
+          type: "table",
+          headers: ["Component", "Model", "Key specifications"],
+          rows: [
+            ["Ceiling speakers (×6–8)", "Stonewater CS-6LM", "80W nominal / 40W RMS, 65Hz–20kHz, 8Ω, 89dB SPL, 100V LMT taps at 2.5W/5W/10W, 1.1–1.4kg"],
+            ["Mixer amplifier (×1)", "Stonewater SMX120", "120W RMS, <0.3% THD, 2 mic + 1 aux input, built-in Bluetooth/USB/SD/FM, 6.2kg"],
+          ],
+        },
+        { type: "subheading", text: "Bar zone" },
+        {
+          type: "paragraph",
+          text: "The amplifier stays constant: Stonewater SR-200 (60W+60W+120W @ 4Ω, built-in active crossover, dedicated subwoofer output, 7.3kg), driving an Impulse150 passive subwoofer (250W RMS, 12\" woofer, 28Hz–250Hz, 4Ω, 16.3kg). What changes is the satellite speaker pair on top of it, and that depends on what the bar is for:",
+        },
+        {
+          type: "table",
+          headers: ["Satellite option", "Best for", "Key specifications"],
+          rows: [
+            ["Stonewater Zeta 3.5", "Value baseline, background presence", "100W nominal, 3.5\" woofer, 90Hz–20kHz, 86dB SPL, 8Ω"],
+            ["Stonewater Element 5", "Weather-resistant, indoor/outdoor bars", "80W program, 5.25\" woofer, 60Hz–20kHz, 89dB SPL, 8Ω"],
+            ["Stonewater Micro 6", "Punchier, higher-SPL bar character", "100W continuous / 400W peak, 6\" woofer, 75Hz–18kHz, 92dB SPL, 8Ω"],
+            ["Stonewater Aqua 6", "Fully outdoor, poolside or rooftop, IP46-rated", "80W RMS / 320W peak, 60Hz–18kHz, 89dB SPL, 8Ω"],
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "Zeta 3.5 is the default. Element 5 earns its place the moment the bar has any outdoor or patio-facing exposure. Micro 6 is what Stonewater itself specs for \"restaurants, lounges, bars,\" a noticeably higher SPL ceiling and a more forward, live character. Aqua 6 is for when the bar is genuinely outdoors, poolside, rooftop edge, open courtyard, where the IP46 rating actually matters.",
+        },
+
+        { type: "subheading", text: "Large multi-zone venue (three or more zones, 3,000+ sq. ft.)" },
+        {
+          type: "table",
+          headers: ["Component", "Model", "Key specifications"],
+          rows: [
+            ["Ceiling speaker array (dining + outdoor/patio)", "Stonewater CS-6LM", "Same as above; 100V line tapping allows long cable runs across multiple rooms off one zone"],
+            ["Multi-zone mixer amplifier (×1)", "Stonewater SMX240", "240W RMS, <0.3% THD, 3 mic + 2 aux inputs, flexible 4–16Ω/70V/100V output, adjustable echo, 12.6kg"],
+            ["Bar/lounge amplifier (×1)", "Stonewater SR-200 or DX3i", "SR-200 as above; or Stonewater DX3i, a 2700W 3-channel Class D amp with built-in 32-bit DSP (8x parametric EQ per channel, crossover/delay/limiter built in, 9.8kg), where the bar zone needs proper room-correction tuning"],
+            ["Bar/lounge speakers + subwoofer", "Any satellite option above (×2) + Impulse150 (×1)", "As specified above"],
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "Fonestar's MAX-120Z or PROX-120Z (120W RMS, 3 independently volume-controlled 100V zones off one amplifier) is worth considering here too, particularly for three lighter zones that don't each need the SMX240's full 240W.",
+        },
+        {
+          type: "paragraph",
+          text: "At this scale, keeping one polished source across every zone starts to matter. The Stonewater MP-01 media player (FM/Bluetooth/optical/coaxial/CD-AUX source switching, tone controls, a mic input with adjustable echo and delay, 2.5kg) can feed the SMX240 and the SR-200 or DX3i simultaneously through its dual-zone output, giving the whole venue one consistent source and one paging point instead of every zone amp running its own separate Bluetooth feed.",
+        },
+
+        { type: "subheading", text: "Unattended, mixer-free zones" },
+        {
+          type: "paragraph",
+          text: "Some zones shouldn't have a mixer at all: a back-of-house corridor, a small counter nook, a private cabin, anywhere staff shouldn't be touching level or source controls. The MP-01 handles this on its own.",
+        },
+        {
+          type: "table",
+          headers: ["Component", "Model", "Role"],
+          rows: [
+            ["Source and paging unit", "Stonewater MP-01", "Source switching, tone, paging mic with echo/delay, all in one 1U unit with a remote"],
+            ["Amplifier", "Stonewater SR-200", "Satellite output plus dedicated subwoofer output"],
+            ["Satellites (×2) + subwoofer", "Element 5, Zeta 3.5, or Micro 6 (per zone) + Impulse150", "As specified above"],
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "The MP-01 isn't limited to this pairing. It can sit ahead of any of the mixer amplifiers above (SMX60, SMX120, SMX240) wherever a fixed, preloaded, mixer-free source is the goal.",
+        },
+
+        { type: "subheading", text: "Premium single-point zones" },
+        {
+          type: "paragraph",
+          text: "A private dining room, a VIP booth, or a fitting room often wants a quieter, higher-fidelity character from one near-invisible fixture rather than PA-style coverage, and that's a different wiring setup: a direct low-impedance stereo speaker on its own amplifier, not a 100V line shared with the rest of the venue.",
+        },
+        {
+          type: "table",
+          headers: ["Component", "Model", "Key specifications"],
+          rows: [
+            ["Stereo in-ceiling speaker", "ELAC IC-CS61-W (Contractor Series)", "Full stereo from one ceiling point, 6.5\" woofer + 2×1\" tweeters, 50Hz–20kHz, 90dB sensitivity, 50W handling, 6Ω"],
+          ],
+        },
+        {
+          type: "paragraph",
+          text: "One fixture delivers full stereo, the whole point in a small room where a visible speaker pair would fight the interior design. It runs on its own dedicated 2-channel amplifier, not the shared 100V line the rest of the venue uses.",
+        },
+
+        {
+          type: "paragraph",
+          text: "Every one of these combinations is a starting point, not a fixed package. The exact speaker count, tap wattage, brand, and amplifier headroom always get sized to your room during the site assessment.",
+        },
+        {
+          type: "note",
+          text: "Planning a space, or fixing one that's already too loud? Get in touch with RGA Sound Image for a site assessment: rgasoundimage.com/contact or WhatsApp +91 79810 35920.",
+        },
+      ],
+    },
+
     "fix-auditorium-echo": {
       title: "Fixing Echo in Large Auditoriums",
       datePublished: "2026-05-01",

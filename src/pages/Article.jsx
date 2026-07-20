@@ -110,6 +110,13 @@ function ArticleBody({ blocks }) {
               </h2>
             );
 
+          case "subheading":
+            return (
+              <h3 key={i} className="text-lg font-semibold mt-8 mb-3">
+                {block.text}
+              </h3>
+            );
+
           case "paragraph":
             return (
               <p key={i} className="text-slate-700 leading-relaxed mb-4">
@@ -138,6 +145,17 @@ function ArticleBody({ blocks }) {
             return (
               <div key={i} className="overflow-x-auto mb-8">
                 <table className="w-full text-sm border border-slate-200 rounded-xl overflow-hidden">
+                  {block.headers && (
+                    <thead>
+                      <tr className="bg-slate-900">
+                        {block.headers.map((h, c) => (
+                          <th key={c} className="px-4 py-2 text-left font-semibold text-white">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                  )}
                   <tbody>
                     {block.rows.map((row, r) => (
                       <tr key={r} className={r % 2 === 0 ? "bg-slate-50" : ""}>

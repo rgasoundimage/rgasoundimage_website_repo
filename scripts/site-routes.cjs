@@ -35,6 +35,10 @@ const routes = [
     path: "/insights/stonewater-sr200",
     priority: "0.8",
   },
+  {
+    path: "/insights/why-restaurants-sound-bad",
+    priority: "0.8",
+  },
 ];
 
 module.exports = { routes };

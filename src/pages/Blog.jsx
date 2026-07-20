@@ -46,11 +46,12 @@ const featuredArticle = {
       status: "published",
     },
     {
-      title: "Choosing Speakers for Restaurants",
+      title: "Why Great-Looking Restaurants Still Sound Bad",
       category: "Commercial AV",
-      description: "How coverage and mounting height affect customer comfort and ambience.",
-      readTime: "Coming soon",
-      status: "coming-soon",
+      description: "Why noise is the top diner complaint, and the real speaker, amplifier and zoning setups that fix it — from a single café to a multi-zone venue.",
+      readTime: "10 min read",
+      slug: "why-restaurants-sound-bad",
+      status: "published",
     },
     {
       title: "Auditorium Sound System Cost in India",
