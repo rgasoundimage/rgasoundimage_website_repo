@@ -1,10 +1,11 @@
-/* Stonewater PWA service worker
+/* RGA Price Catalogue — PWA service worker
    v2 — network-first so redeploys show up on reload, cache fallback for offline */
 const CACHE = "stonewater-dev";
 const ASSETS = [
   "./", "index.html", "styles.css", "app.js", "prices.json",
   "manifest.webmanifest",
-  "icons/icon-192.png", "icons/icon-512.png",
+  "icons/rga-logo.png",
+  "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
   "icons/apple-touch-icon.png", "icons/favicon-32.png"
 ];
 

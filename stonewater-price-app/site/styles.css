@@ -1,9 +1,20 @@
 :root{
-  --bg:#0E0F12; --surface:#16181D; --surface2:#1E2127; --surface3:#24272F;
-  --border:#2A2E37; --border-soft:#21242B;
-  --text:#E8E9EC; --muted:#8A8F9A; --muted2:#5C616C;
-  --amber:#FFB02E; --amber-dim:#7a5418; --amber-soft:#3a2c12;
-  --ok:#3FB97E; --danger:#E5564B;
+  color-scheme:light;
+  /* RGA palette — two literal colours: #141943 navy, #FFFFFF white.
+     Every grey is navy at reduced opacity, so nothing off-brand enters the UI.
+     Token NAMES are unchanged from the dark theme on purpose: ~300 of the rules
+     below reference them and never needed editing. --amber* is now navy; it kept
+     its name because it still marks "the accent role". */
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:rgba(20,25,67,.04); --surface3:rgba(20,25,67,.08);
+  --border:rgba(20,25,67,.18); --border-soft:rgba(20,25,67,.10);
+  /* --muted2 is .60 not .45: at .45 it renders 2.87:1 on white and fails AA for
+     small text (footer, .crumb, .meta, field sub-labels). .60 clears 4.5:1. */
+  --text:#141943; --muted:rgba(20,25,67,.62); --muted2:rgba(20,25,67,.60);
+  --amber:#141943; --amber-dim:rgba(20,25,67,.30); --amber-soft:rgba(20,25,67,.06);
+  /* semantics kept, hues re-tuned for white (the originals scored 2.5:1 and 3.6:1) */
+  --ok:#157F4F; --danger:#B3261E;
+  /* warning owns its tokens now that --amber is navy */
+  --warn:#8A5A00; --warn-soft:#FFF6E4; --warn-dim:#EFD9A6;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --safe-t:env(safe-area-inset-top,0px);
@@ -17,27 +28,35 @@ button,input,select{font-family:inherit}
 /* ---------- top bar ---------- */
 .topbar{
   position:sticky;top:0;z-index:30;
-  display:flex;align-items:flex-end;justify-content:space-between;
+  /* 1fr | auto | 1fr keeps the logo optically centred regardless of how wide the
+     brand name is. Equal side columns are only sufficient because the effective-
+     date pill was removed — with it, .top-right was 166px and pushed the centre
+     column left on every phone under 390px. */
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:flex-end;
   padding:calc(12px + var(--safe-t)) 16px 10px;
-  background:linear-gradient(180deg,#101216 0%, #0E0F12 100%);
+  background:var(--bg);
   border-bottom:1px solid var(--border-soft);
 }
+.brand{min-width:0}
+.brand-logo{height:38px;width:auto;display:block}
 .brand-name{font-weight:700;font-size:19px;letter-spacing:-.01em;display:block;line-height:1}
 .brand-select{
   appearance:none;-webkit-appearance:none;border:none;background:transparent;
   color:var(--text);font-family:var(--sans);font-weight:700;font-size:19px;
-  letter-spacing:-.01em;line-height:1.05;padding:0 22px 0 0;margin:0;max-width:60vw;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23FFB02E' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  letter-spacing:-.01em;line-height:1.05;padding:0 22px 0 0;margin:0;max-width:34vw;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23141943' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   background-repeat:no-repeat;background-position:right center;
 }
 .brand-select:focus{outline:none}
 .brand-sub{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-top:4px;display:block}
-.eff{
-  font-family:var(--mono);font-size:11px;color:var(--amber);
-  background:var(--amber-soft);border:1px solid var(--amber-dim);
-  padding:4px 8px;border-radius:6px;white-space:nowrap;
+/* FR-3c: at 320px the sub-label is the widest thing on the left and closes to
+   1.3px of the logo. Tightening it restores 22px of clearance. */
+@media (max-width:359px){
+  .brand-select{max-width:30vw}
+  .brand-sub{font-size:10px;letter-spacing:.12em}
 }
-.top-right{display:flex;align-items:center;gap:8px}
+.top-right{display:flex;align-items:center;gap:8px;justify-self:end}
 .iconbtn{
   width:34px;height:30px;border-radius:8px;border:1px solid var(--border);
   background:var(--surface2);color:var(--muted);font-size:16px;line-height:1;
@@ -101,7 +120,7 @@ button,input,select{font-family:inherit}
   appearance:none;-webkit-appearance:none;width:100%;
   background:var(--surface2);color:var(--text);border:1px solid var(--border);
   border-radius:10px;padding:11px 30px 11px 12px;font-size:15px;font-weight:600;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%238A8F9A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23141943' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   background-repeat:no-repeat;background-position:right 11px center;
 }
 .field select:focus{outline:none;border-color:var(--amber-dim)}
@@ -177,13 +196,13 @@ button,input,select{font-family:inherit}
 .foot{position:fixed;bottom:0;left:0;right:0;z-index:30;
   display:flex;gap:8px;justify-content:center;align-items:center;
   padding:11px 16px calc(11px + var(--safe-b));font-size:11px;color:var(--muted2);
-  background:linear-gradient(0deg,#0E0F12 70%,transparent);font-family:var(--mono)}
+  background:linear-gradient(0deg,#FFFFFF 70%,transparent);font-family:var(--mono)}
 .foot .dot{opacity:.5}
 
 .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
 
 /* ---------- modal ---------- */
-.modal{position:fixed;inset:0;z-index:50;background:rgba(6,7,9,.72);
+.modal{position:fixed;inset:0;z-index:50;background:rgba(20,25,67,.42);
   display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
 [hidden]{display:none !important}
 .sheet{width:100%;max-width:460px;background:var(--surface2);border:1px solid var(--border);
@@ -198,7 +217,7 @@ button,input,select{font-family:inherit}
 .passerr{color:var(--danger);font-size:13px;margin:8px 2px 0}
 .modal-actions{display:flex;gap:10px;margin-top:18px}
 .btn{flex:1;border:none;border-radius:11px;padding:14px;font-size:15px;font-weight:650;
-  background:var(--amber);color:#1a1206}
+  background:var(--amber);color:#FFFFFF}
 .btn.ghost{background:var(--surface3);color:var(--text)}
 .btn:active{filter:brightness(.92)}
 
@@ -211,7 +230,10 @@ button,input,select{font-family:inherit}
   border-radius:10px;padding:10px 12px;font-size:14px;font-weight:650;letter-spacing:-.01em;
   display:flex;align-items:center;justify-content:center;gap:6px;
 }
-.tab.active{background:var(--surface3);color:var(--text);border-color:var(--amber-dim)}
+/* On the dark theme, active/inactive read apart via a subtle lift (surface -> surface3)
+   plus an amber border. On white that lift is an 8% tint against pure white and barely
+   registers, so the active tab inverts to a solid navy fill — as shown in the mockup. */
+.tab.active{background:var(--text);color:#FFFFFF;border-color:var(--text)}
 .tab .tablock{font-size:11px;opacity:.85}
 
 /* ========================================================= */
@@ -255,7 +277,7 @@ button,input,select{font-family:inherit}
 }
 .qf select{
   appearance:none;-webkit-appearance:none;font-family:var(--sans);padding-right:22px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%238A8F9A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23141943' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   background-repeat:no-repeat;background-position:right 7px center;
 }
 .qf input:focus,.qf select:focus{outline:none;border-color:var(--amber-dim)}
@@ -284,7 +306,7 @@ button,input,select{font-family:inherit}
 .qbar{
   position:sticky;bottom:calc(8px + var(--safe-b));margin-top:14px;
   background:var(--surface2);border:1px solid var(--border);border-radius:14px;
-  padding:12px 14px;box-shadow:0 -8px 24px rgba(6,7,9,.5);
+  padding:12px 14px;box-shadow:0 -8px 24px rgba(20,25,67,.10);
 }
 .qsum-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:13px;color:var(--muted)}
 .qsum-row b{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text)}
@@ -308,7 +330,7 @@ button,input,select{font-family:inherit}
 #pickSearch:focus{outline:none;border-color:var(--amber-dim);background:var(--surface2)}
 #pickSearch::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
 .pickadded{
-  font-size:12px;color:var(--ok);background:rgba(63,185,126,.1);border:1px solid rgba(63,185,126,.3);
+  font-size:12px;color:var(--ok);background:#E9F5EF;border:1px solid rgba(21,127,79,.32);
   border-radius:8px;padding:7px 10px;margin-bottom:10px;font-weight:600;
 }
 .pickresults{max-height:48vh;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:6px}
@@ -321,14 +343,43 @@ button,input,select{font-family:inherit}
 .pickrow.added:active{background:var(--surface);border-color:var(--border-soft)}
 .pickcheck{
   flex-shrink:0;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
-  color:var(--ok);background:rgba(63,185,126,.12);border:1px solid rgba(63,185,126,.35);
+  color:var(--ok);background:#E9F5EF;border:1px solid rgba(21,127,79,.32);
   padding:3px 7px;border-radius:5px;white-space:nowrap;
 }
-.pickadded.warn{color:var(--amber);background:var(--amber-soft);border-color:var(--amber-dim)}
+.pickadded.warn{color:var(--warn);background:var(--warn-soft);border-color:var(--warn-dim)}
 .pickinfo{min-width:0;display:flex;flex-direction:column;gap:2px}
 .pickmodel{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text)}
 .pickdesc{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
 .picktag{
   flex-shrink:0;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
   color:var(--muted);background:var(--surface3);border:1px solid var(--border);padding:3px 7px;border-radius:5px;
+}
+
+/* ========================================================= */
+/* Focus visibility (v2.3.0)                                 */
+/* The dark theme signalled focus with `border-color:var(--amber-dim)` alone.
+   On white that is a faint navy tint and effectively invisible, so every
+   interactive control gets a real ring. :focus-visible keeps it off for
+   pointer taps and on for keyboard traversal.                */
+/* ========================================================= */
+.brand-select:focus-visible,
+.field select:focus-visible,
+#search:focus-visible,
+#pickSearch:focus-visible,
+#passInput:focus-visible,
+.qf input:focus-visible,
+.qf select:focus-visible,
+.btn:focus-visible,
+.tab:focus-visible,
+.iconbtn:focus-visible,
+.mini:focus-visible,
+.reveal:focus-visible,
+.lockbtn:focus-visible,
+.clearbtn:focus-visible,
+.qremove:focus-visible,
+.pickrow:focus-visible,
+.subcat-head:focus-visible,
+.chk input:focus-visible{
+  outline:2px solid var(--text);
+  outline-offset:2px;
 }

@@ -1,0 +1,64 @@
+RGA Price App — v2.3.0 (light theme + RGA logo)
+================================================
+
+DO NOT DELETE YOUR EXISTING FOLDER AND UNZIP THIS IN ITS PLACE.
+
+This zip does not contain everything your repo folder has. It is missing:
+
+  .git/          your entire commit history
+  data/*.xlsx    the Stonewater and Kasper source spreadsheets
+
+Those were never uploaded, so they could not be included. Deleting your folder
+first would lose both permanently.
+
+
+CORRECT WAY TO APPLY
+--------------------
+Extract this zip ON TOP of your existing stonewater-price-app folder and let it
+overwrite. Everything it contains is meant to replace what is there; anything it
+does not contain (.git, data/) is left untouched.
+
+  macOS   : unzip -o rga-price-app-v2.3.0.zip -d /path/to/parent-folder
+  Windows : extract, then copy the stonewater-price-app folder over the top and
+            choose "Replace the files in the destination"
+
+Then check `git status` — you should see roughly:
+
+  modified: site/index.html, site/styles.css, site/app.js, site/sw.js,
+            site/manifest.webmanifest, package.json, CHANGELOG.md
+  modified: site/icons/icon-192.png, icon-512.png,
+            apple-touch-icon.png, favicon-32.png
+  new file: site/icons/rga-logo.png, site/icons/icon-maskable-512.png
+
+If git reports data/ or anything else as DELETED, stop and restore before
+committing — that means the folder was replaced rather than merged.
+
+
+NOTE ON .gitignore
+------------------
+Included as `.gitignore` (leading dot). It is byte-identical to the one you
+already have; it was uploaded as `_gitignore` because upload tools rename
+dotfiles. If your extractor hides it, nothing is lost — yours is unchanged.
+
+
+COMMIT
+------
+  git add -A
+  git commit -m "v2.3.0 — light theme, RGA logo, renamed to RGA Prices"
+  git push
+
+Netlify auto-deploys and scripts/stamp-cache.mjs stamps the service-worker
+cache from the commit SHA. The installed PWA refreshes once on next open.
+
+
+AFTER DEPLOY
+------------
+Tell anyone with the app pinned to an iPhone home screen to delete and re-add
+it. iOS does not refresh the icon or label of an existing shortcut, so they
+will keep the old dark icon and the "Stonewater" name until they do. Nothing
+is broken — start_url and scope are unchanged, so this is a rename, not a new
+app.
+
+Full detail of what changed is in CHANGELOG.md under [2.3.0].
+
+You can delete this file once the update is applied.

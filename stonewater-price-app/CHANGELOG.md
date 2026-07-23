@@ -6,6 +6,62 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.3.0] — Light theme, RGA logo, renamed to RGA Prices — 2026-07-23 · cache `stonewater-<commitSHA>`
+Visual refresh to the RGA brand palette. Presentation layer only — no pricing
+data, role gating, or Quote Builder logic changed.
+
+### Changed
+- **Light theme.** White surfaces, `#141943` navy text throughout. The `:root`
+  token names are unchanged and were simply re-pointed, so ~300 of the 334
+  stylesheet rules needed no edit. `--amber` is now navy; it kept its name
+  because it still marks the accent role.
+- **App renamed to RGA Prices.** Five user-facing strings: browser title, iOS
+  home-screen title, and the manifest `name` / `short_name` / `description`.
+  The app covers both Stonewater and Kasper, so naming it after one brand was
+  wrong. **The product ranges keep their names everywhere** — brand switcher,
+  price-list labels, quote tags and `prices.json` are untouched.
+- **RGA logo** added, centred in the top bar. `.topbar` changed from flex to a
+  `1fr auto 1fr` grid to hold it.
+- **Icons** regenerated in the brand palette. The meter-bar mark is kept — only
+  its colours change. Adds a proper full-bleed maskable icon; the manifest
+  previously pointed its `maskable` entry at the rounded-corner tile, which
+  Android crops into on circular masks.
+- **Semantic colours re-tuned for white.** `--ok` `#3FB97E` → `#157F4F`,
+  `--danger` `#E5564B` → `#B3261E`. The originals scored 2.48:1 and 3.64:1 on
+  white and failed WCAG AA. Meanings and selectors are unchanged.
+- **Active tab** inverts to a solid navy fill. The old surface lift was an 8%
+  tint against pure white and did not read.
+- `--muted2` raised from 45% to 60% navy — at 45% the footer, breadcrumbs and
+  sub-labels rendered 2.87:1 and failed AA.
+- `apple-mobile-web-app-status-bar-style` `black-translucent` → `default`.
+  iOS draws the status bar over the app background; on a white top bar that
+  rendered white-on-white and the clock disappeared.
+
+### Added
+- `--warn` / `--warn-soft` / `--warn-dim` tokens for the duplicate-add notice,
+  which could no longer borrow `--amber` once that became navy. It stays amber.
+- Visible `:focus-visible` rings on all interactive controls. The dark theme
+  signalled focus with a border tint that is invisible on white.
+- `color-scheme: light` in `:root`, so native pickers and scrollbars match.
+
+### Removed
+- **The effective-date pill.** With the date, the top-right block measured
+  166 px, exceeded its grid share below 390 px and pushed the logo off centre —
+  overlapping the brand name at 320 px. Removing it leaves the ⚙ alone at 34 px
+  and the header centres cleanly from 320 px up. `effectiveDate` remains in
+  `prices.json`; it is simply no longer displayed.
+
+### Notes
+- **iOS will not refresh the icon or label of an already-installed home-screen
+  shortcut.** Anyone with the app pinned keeps the old dark icon and the
+  "Stonewater" label until they delete and re-add it. Nothing breaks —
+  `start_url` and `scope` are unchanged, so this is a rename, not a new app.
+- The repo folder and `package.json` `name` stay `stonewater-price-app`:
+  Netlify's **Base directory** setting points at that path, and renaming the
+  folder would break the build until the dashboard is changed by hand.
+
+---
+
 ## [2.2.1] — Quote Builder: no duplicate lines — 2026-06-23 · cache `stonewater-<commitSHA>`
 Bug fix (see `BUGS.md` → BUG-001).
 

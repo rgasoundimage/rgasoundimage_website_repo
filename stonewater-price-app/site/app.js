@@ -1,5 +1,5 @@
 /* =========================================================
-   Stonewater Price Catalogue — app logic
+   RGA Price Catalogue — app logic
    ---------------------------------------------------------
    CHANGE THE PASSCODE HERE  ↓↓↓  (one line)
 ========================================================= */
@@ -73,7 +73,6 @@ function populateBrands() {
 function setBrand(id) {
   brandId = id;
   localStorage.setItem(LS.brand, brandId);
-  $("effDate").textContent = "Eff. " + curBrand().effectiveDate;
   populateLists();   // list set differs per brand; falls back if current id is gone
   render();
 }
@@ -711,7 +710,6 @@ async function boot() {
   const savedBrand = localStorage.getItem(LS.brand);
   brandId = savedBrand && DATA.brands.some((b) => b.id === savedBrand) ? savedBrand : DATA.brands[0].id;
   populateBrands();
-  $("effDate").textContent = "Eff. " + curBrand().effectiveDate;
 
   const saved = localStorage.getItem(LS.list);
   listId = saved && curBrand().lists.some((l) => l.id === saved) ? saved : curBrand().lists[0].id;
