@@ -6,6 +6,27 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.3.1] — Icon cache fix — 2026-07-23 · cache `stonewater-<commitSHA>`
+Patch. v2.3.0 shipped new icons under their existing filenames, but
+`netlify.toml` served `/icons/*` with `max-age=31536000, immutable` — which
+tells the browser never to revalidate. Anyone who had opened the app before
+kept the old amber icons regardless of the deploy.
+
+### Fixed
+- Icon URLs now carry `?v=2.3.0` in `index.html`, `manifest.webmanifest` and the
+  service-worker precache list. A changed URL is the only thing that escapes an
+  `immutable` cache entry that a client already holds.
+- `netlify.toml` `/icons/*` changed from `max-age=31536000, immutable` to
+  `max-age=86400, must-revalidate`. `immutable` is only correct for
+  content-hashed filenames; these names are stable across releases, so the old
+  header would have hidden every future icon change for a year too.
+
+### Note
+iOS still will not repaint the icon of an existing home-screen shortcut — that
+is a springboard cache, separate from HTTP. Delete and re-add the shortcut.
+
+---
+
 ## [2.3.0] — Light theme, RGA logo, renamed to RGA Prices — 2026-07-23 · cache `stonewater-<commitSHA>`
 Visual refresh to the RGA brand palette. Presentation layer only — no pricing
 data, role gating, or Quote Builder logic changed.

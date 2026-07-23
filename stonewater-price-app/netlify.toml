@@ -14,12 +14,16 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Long-cache the immutable icons; never hard-cache the app shell or data,
-# the service worker handles offline. (Safe defaults; tweak if you like.)
+# Icons. NOT `immutable`: these filenames are stable (icon-192.png keeps its
+# name across releases), and `immutable` tells the browser never to revalidate,
+# so a redesigned icon would be invisible to existing users for a year. That is
+# exactly what happened in v2.3.0. `must-revalidate` keeps them cheap — the
+# browser still gets a 304 on an unchanged file — while letting a real change
+# land. Icon URLs also carry ?v=<version>; bump it whenever the artwork changes.
 [[headers]]
   for = "/icons/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=86400, must-revalidate"
 
 [[headers]]
   for = "/sw.js"
