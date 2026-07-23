@@ -1,0 +1,91 @@
+RGA Price App — v2.4.0 (Distributor baseline in the Quote Builder)
+==================================================================
+
+APPLYING
+--------
+Extract ON TOP of your existing stonewater-price-app folder and let it
+overwrite. Do NOT delete the folder first — this zip does not contain your
+.git/ history, and data/*.xlsx is excluded on purpose (see below).
+
+  unzip -o rga-price-app-v2.4.0.zip -d /path/to/PARENT-of-stonewater-price-app
+
+Note "PARENT". Extracting inside the repo folder gives you a nested
+stonewater-price-app/stonewater-price-app/ and nothing takes effect.
+
+After extracting, run `git status`. Expect modifications to:
+  build_prices.py, package.json, CHANGELOG.md
+  site/app.js, site/prices.json
+and one new file:
+  tests/quote-distributor.test.mjs
+
+site/index.html and site/styles.css are NOT touched this release.
+If git reports data/ as deleted, stop and restore before committing.
+
+  npm test          # 42 assertions, all should pass
+  git add -A
+  git commit -m "v2.4.0 — Distributor baseline in the Quote Builder"
+  git push
+
+
+ABOUT data/*.xlsx
+-----------------
+You uploaded both workbooks and I used them to regenerate site/prices.json,
+which IS included here. The .xlsx files themselves are excluded so this zip
+cannot overwrite whatever is currently in your data/ folder. Your local copies
+are the ones you edited, so they are already correct — keep them.
+
+You do not need to re-run `npm run data`. If you do, the output will match.
+
+
+WHAT CHANGED
+------------
+1. Quote Builder — "Compare to" now offers Retail, Dealer, Distributor.
+2. Kasper picked up the new "Dist RGA Price (inc taxes)" column.
+3. A bug was caught before it shipped — read the next section.
+
+
+READ THIS: A WRONG PRICE NEARLY WENT LIVE
+-----------------------------------------
+Inserting the new Kasper column at position 4 pushed every later column one to
+the right. build_prices.py maps columns by hard-coded number, so it happily
+built with everything misaligned — no error, no warning:
+
+  mrp           read 28,729  (should be 33,900 — it read List+Tax)
+  dealer        read 18,645  (should be 22,983)
+  dealerMargin  read 33,900  (a rupee figure in a percentage field)
+
+MRP is the price customers see. Had that built and deployed, every Kasper
+product would have shown roughly 5,000 rupees under its real MRP.
+
+Fixed two ways. The field map is corrected, and build_prices.py now verifies
+every column header before writing anything — if a column moves again it stops
+with a message naming the mismatched columns and leaves prices.json untouched.
+
+So: keep the new column where it is. No need to move it to the end of the
+sheet. Just be aware that if you add another column, the build will now fail
+loudly and you (or I) update the index map — that failure is the safety net
+working, not a breakage.
+
+
+THE TAX ASYMMETRY — WORTH REMEMBERING
+-------------------------------------
+Retail, Dealer and the price you type are all PRE-tax. The Distributor
+baseline is TAX-INCLUSIVE. You signed off on this deliberately: it measures
+margin against what the goods actually cost you, landed.
+
+The consequence to keep in mind is that a Distributor margin is not directly
+comparable to a Dealer margin on the same line. It will read a few points
+lower than a like-for-like figure, purely because of the tax in the baseline —
+not because the deal is worse. Distributor will still show the largest margin
+of the three, since it is the lowest baseline.
+
+The dropdown says just "Distributor", with no tax annotation, as you asked.
+
+
+MP-01
+-----
+Now displays in the catalogue as "Media Player MP-01". Both Stonewater sheets
+were verified to match: 67 products each, no leftovers on either side.
+
+
+You can delete this file once applied.

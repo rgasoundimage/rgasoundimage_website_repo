@@ -6,6 +6,53 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.4.0] — Distributor baseline in the Quote Builder — 2026-07-23 · cache `stonewater-<commitSHA>`
+Minor. The Quote Builder's per-line **Compare to** selector gains a third
+baseline, **Distributor**, so an entered price can be measured against real
+landed cost rather than only against Retail or Dealer.
+
+### Added
+- **Distributor baseline.** Dropdown order is Retail · Dealer · Distributor.
+  The label is plain `Distributor` for both brands. Sourced from
+  `distInclTax` — the same key on Stonewater and Kasper — which is the
+  distributor price **including taxes**.
+- `distInclTax` for Kasper in `build_prices.py` / `prices.json`, mapped from the
+  new `Dist RGA Price (inc taxes)` column. Stonewater already carried the field.
+- **Column header assertions in `build_prices.py`.** Every mapped column index
+  is now checked against its expected header text before anything is written,
+  and the build aborts on mismatch. See Fixed below for why.
+- `tests/quote-distributor.test.mjs` — 42 assertions covering data integrity,
+  baseline resolution, margin maths, dropdown markup and internal-list
+  containment. `npm test`.
+
+### Fixed
+- **Kasper column shift would have shipped a wrong customer-facing price.**
+  The new incl-tax column was inserted at index 4, shifting every later column
+  right by one. `build_prices.py` maps by hard-coded index and did not error —
+  it built cleanly and wrote `mrp` = 28,729 (the List+Tax figure) instead of
+  33,900, plus a rupee value into the `dealerMargin` percent field. MRP is what
+  customers see. The field map is corrected and the header assertions above
+  make this class of silent corruption fail loudly next time.
+
+### Changed
+- Stonewater `MP-01` is now `Media Player MP-01`, renamed on both source sheets.
+  This is the model string shown in the catalogue. The two Stonewater sheets'
+  model sets now match exactly, 67 each.
+
+### Note on tax
+Retail, Dealer and the entered price are **pre-tax**; the Distributor baseline
+is **tax-inclusive**. This asymmetry is deliberate — it measures margin against
+real landed cost — but it means Distributor margins read lower than a
+like-for-like comparison by roughly the tax rate. Recorded in PRD v2.4.0 §4 and
+in a comment at the top of the Quote Builder section of `app.js`.
+
+### Unchanged
+Pricing logic elsewhere, role gating, the passcode, `index.html`, `styles.css`,
+and which lists are `internalOnly`. The internal `distdealer` list is not read
+by the Quote Builder — the tax-inclusive figure lives in the public lists.
+
+---
+
 ## [2.3.1] — Icon cache fix — 2026-07-23 · cache `stonewater-<commitSHA>`
 Patch. v2.3.0 shipped new icons under their existing filenames, but
 `netlify.toml` served `/icons/*` with `max-age=31536000, immutable` — which

@@ -25,8 +25,37 @@ def clean(v):
     if isinstance(v, float) and v.is_integer(): return int(v)
     return v
 
+def assert_headers(ws, header_row, expect):
+    """Fail loudly if a mapped column index no longer holds the expected header.
+
+    Inserting a column into a source sheet shifts every later index by one.
+    Without this check the build still 'succeeds' and silently writes wrong
+    values into prices.json -- e.g. MRP reading the List+Tax column. Each
+    expected value is matched case-insensitively as a prefix, so trailing
+    whitespace or a renamed suffix in the sheet will not trip it.
+    """
+    rows = list(ws.iter_rows(values_only=True))
+    hdr = rows[header_row]
+    problems = []
+    for idx, want in sorted(expect.items()):
+        got = hdr[idx] if idx < len(hdr) else None
+        got_s = '' if got is None else str(got).strip()
+        if not got_s.lower().startswith(want.strip().lower()):
+            problems.append(
+                f"  col {idx}: expected header starting {want!r}, found {got_s!r}")
+    if problems:
+        raise SystemExit(
+            f"\nCOLUMN MAP MISMATCH in sheet {ws.title!r}:\n"
+            + "\n".join(problems)
+            + "\n\nA column was probably inserted, removed or renamed. Update the"
+              "\nfield indices and the expect={...} map in build_prices.py to match."
+              "\nNothing was written -- prices.json is unchanged.\n")
+
+
 def build_list(ws, *, header_row, model, desc, hsn, fields, labels, roles,
-               percent_keys, top_levels):
+               percent_keys, top_levels, expect=None):
+    if expect:
+        assert_headers(ws, header_row, expect)
     rows = list(ws.iter_rows(values_only=True))
     price_cols = [c for c, _ in fields.values()]
     cats = []
@@ -81,7 +110,11 @@ praveen = build_list(swwb['Praveen Price List'], header_row=2, model=1, desc=2, 
             'dealerMargin':'Dealer margin','msrpMargin':'MSRP margin'},
     roles={'customer':['msrp'],'dealer':['dealer','msrp'],'subdealer':['subdealer','msrp'],
            'internal':['msrp','msrp35','msrp30','msrp20','msrp15','dealer','subdealer','listPrice','distInclTax','dealerMargin','msrpMargin']},
-    percent_keys=['dealerMargin','msrpMargin'], top_levels=SW_TOP)
+    percent_keys=['dealerMargin','msrpMargin'], top_levels=SW_TOP,
+    expect={1:'Model Number',2:'Description',3:'HSN',4:'P_ListPrice',5:'Dealer Price',
+            6:'Sub dealer price',7:'Distributor Price Tax In',8:'MSRP (P_Price',
+            9:'MSRP - 35%',10:'MSRP - 30%',11:'MSRP - 20%',12:'MSRP - 15%',
+            13:'Dealer price msrp',14:'MSRP margin'})
 praveen.update({'id':'praveen','label':'Price List','internalOnly':False})
 
 distdealer = build_list(swwb['Stonewater_Dist_Dealer_price'], header_row=2, model=0, desc=1, hsn=2,
@@ -94,19 +127,28 @@ distdealer = build_list(swwb['Stonewater_Dist_Dealer_price'], header_row=2, mode
             'subdealerDistMargin':'Sub-dealer-dist margin'},
     roles={'customer':['msrp'],'dealer':['dealer','msrp'],'subdealer':['subdealer','msrp'],
            'internal':['msrp','msrp30','msrp20','dealer','subdealer','listPrice','distCost','distInclTax','dealerDistMargin','subdealerDistMargin']},
-    percent_keys=['dealerDistMargin','subdealerDistMargin'], top_levels=SW_TOP)
+    percent_keys=['dealerDistMargin','subdealerDistMargin'], top_levels=SW_TOP,
+    expect={0:'Model Number',1:'Description',2:'HSN',3:'Distributor Price',
+            4:'List_Price + tax',5:'Dealer Price',6:'Sub dealer price',
+            7:'Distributor Price Tax In',8:'MSRP inclusive',9:'MSRP - 30%',
+            10:'MSRP - 20%',11:'Dealer-dist margin',12:'Subdealer-dist margin'})
 distdealer.update({'id':'distdealer','label':'Dist / Dealer','internalOnly':True})
 
 # ---------------- Kasper ----------------
 kawb = load_workbook(KA, data_only=True)
 kasper = build_list(kawb['Products'], header_row=0, model=1, desc=2, hsn=None,
-    fields={'distRga':(3,'inr'),'dealer':(4,'inr'),'listPlusTax':(5,'inr'),'mrp':(6,'inr'),
-            'dealerMargin':(7,'pct'),'distMargin':(8,'pct')},
-    labels={'distRga':'Dist RGA cost','dealer':'Dealer','listPlusTax':'List price +Tax',
+    fields={'distRga':(3,'inr'),'distInclTax':(4,'inr'),'dealer':(5,'inr'),
+            'listPlusTax':(6,'inr'),'mrp':(7,'inr'),
+            'dealerMargin':(8,'pct'),'distMargin':(9,'pct')},
+    labels={'distRga':'Dist RGA cost','distInclTax':'Distributor (tax incl.)',
+            'dealer':'Dealer','listPlusTax':'List price +Tax',
             'mrp':'MRP','dealerMargin':'Dealer margin','distMargin':'Dist margin'},
     roles={'customer':['mrp'],'dealer':['dealer','mrp'],'subdealer':['mrp'],
-           'internal':['mrp','dealer','listPlusTax','distRga','dealerMargin','distMargin']},
-    percent_keys=['dealerMargin','distMargin'], top_levels=None)
+           'internal':['mrp','dealer','listPlusTax','distRga','distInclTax','dealerMargin','distMargin']},
+    percent_keys=['dealerMargin','distMargin'], top_levels=None,
+    expect={1:'Model No',2:'Description',3:'Dist RGA Price',
+            4:'Dist RGA Price (inc taxes)',5:'Dealer Price',6:'List price plus Tax',
+            7:'MRP',8:'Dealer Margin',9:'Dist Margin'})
 kasper.update({'id':'products','label':'Price List','internalOnly':False})
 
 out = {'brands':[

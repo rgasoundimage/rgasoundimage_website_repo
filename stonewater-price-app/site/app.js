@@ -386,7 +386,14 @@ $("clearSearch").addEventListener("click", () => {
 /* =========================================================
    QUOTE BUILDER (internal) — in-memory only, nothing saved.
    A line: { uid, brandId, brandName, model, description,
-             retail, dealer, basis:'retail'|'dealer', price:'', qty:1 }
+             retail, dealer, dist,
+             basis:'retail'|'dealer'|'distributor', price:'', qty:1 }
+
+   NOTE ON TAX: retail, dealer and the entered price are all pre-tax. `dist`
+   is the distributor price INCLUDING taxes (Stonewater `distInclTax`, Kasper
+   `distInclTax`). This asymmetry is deliberate -- see PRD v2.4.0 section 4.
+   Distributor margins therefore read lower than a like-for-like comparison
+   by roughly the tax rate, because they measure against real landed cost.
 ========================================================= */
 let tab = "catalogue";
 let quote = [];
@@ -433,7 +440,9 @@ const marginClass = (v) => (v > 0 ? "pos" : v < 0 ? "neg" : "zero");
 
 /* ----- per-line + total math (profit margin = (price − base) / price) ----- */
 function lineBaseline(line) {
-  const b = line.basis === "dealer" ? line.dealer : line.retail;
+  const b = line.basis === "dealer" ? line.dealer
+          : line.basis === "distributor" ? line.dist
+          : line.retail;
   return Number.isFinite(b) ? b : NaN;
 }
 function lineCalc(line) {
@@ -474,6 +483,8 @@ function buildProductIndex() {
               brandId: b.id, brandName: b.name,
               model: p.model, description: p.description || "",
               retail: Number(retail), dealer: Number(p.prices.dealer),
+              // Tax-inclusive distributor price. Same key on both brands.
+              dist: Number(p.prices.distInclTax),
             });
           }
     }
@@ -511,6 +522,7 @@ function renderQuote() {
 function qLineHTML(line) {
   const hasRetail = Number.isFinite(line.retail);
   const hasDealer = Number.isFinite(line.dealer);
+  const hasDist = Number.isFinite(line.dist);
   const c = lineCalc(line);
   const baseStr = Number.isFinite(c.base) ? inr(c.base) : "—";
   return `<div class="qline" data-uid="${line.uid}">
@@ -528,6 +540,7 @@ function qLineHTML(line) {
         <select class="qbasis" data-uid="${line.uid}">
           <option value="retail" ${line.basis === "retail" ? "selected" : ""} ${hasRetail ? "" : "disabled"}>Retail</option>
           <option value="dealer" ${line.basis === "dealer" ? "selected" : ""} ${hasDealer ? "" : "disabled"}>Dealer</option>
+          <option value="distributor" ${line.basis === "distributor" ? "selected" : ""} ${hasDist ? "" : "disabled"}>Distributor</option>
         </select>
       </label>
       <label class="qf">
@@ -600,12 +613,16 @@ function inQuote(prod) {
 }
 function addLine(prod) {
   if (inQuote(prod)) return false;            // no duplicate lines
-  const basis = Number.isFinite(prod.retail) ? "retail" : "dealer";
+  // Distributor is never auto-selected -- it is an opt-in comparison. It is
+  // only reached as a last resort when neither public price exists.
+  const basis = Number.isFinite(prod.retail) ? "retail"
+              : Number.isFinite(prod.dealer) ? "dealer"
+              : "distributor";
   quote.push({
     uid: "q" + (++uidSeq),
     brandId: prod.brandId, brandName: prod.brandName,
     model: prod.model, description: prod.description,
-    retail: prod.retail, dealer: prod.dealer,
+    retail: prod.retail, dealer: prod.dealer, dist: prod.dist,
     basis, price: "", qty: 1,
   });
   renderQuote();
