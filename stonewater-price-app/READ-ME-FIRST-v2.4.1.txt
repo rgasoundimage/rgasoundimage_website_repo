@@ -1,0 +1,73 @@
+RGA Price App — v2.4.1 (quote fields no longer truncate on phones)
+==================================================================
+
+APPLYING
+--------
+Extract ON TOP of your existing stonewater-price-app folder and let it
+overwrite. Do NOT delete the folder first.
+
+  unzip -o rga-price-app-v2.4.1.zip -d /path/to/PARENT-of-stonewater-price-app
+
+Note "PARENT". Extracting inside the repo folder gives you a nested
+stonewater-price-app/stonewater-price-app/ and nothing takes effect.
+
+After extracting, `git status` should show modifications to exactly three files:
+  site/styles.css, package.json, CHANGELOG.md
+
+If it shows more than that, something from the 2.4.0 zip did not get committed —
+check before pushing.
+
+  npm test          # 42 assertions, all should pass
+  git add -A
+  git commit -m "v2.4.1 — raise quote grid breakpoint to 430px"
+  git push
+
+
+WHAT CHANGED
+------------
+One number in site/styles.css, line ~306:
+
+  @media (max-width:380px)   ->   @media (max-width:430px)
+
+That's the whole fix. No HTML, no JavaScript, no data, no pricing logic.
+
+
+WHY IT WAS BROKEN
+-----------------
+The quote line's four fields — Compare to, Baseline, Your price, Qty — already
+had a two-column fallback for narrow screens. The breakpoint was set at 380px.
+Every current iPhone is 390 to 430 CSS pixels wide, so none of them ever
+reached it. They kept all four fields on a single row at about 82px each,
+which leaves roughly 64px of usable text space, or seven characters at the
+14px monospace face.
+
+  ₹30,195     7 chars   fit
+  ₹1,254.34   9 chars   showed as ₹1,254…
+  ₹2,89,000   9 chars   showed as ₹2,89,…
+  Distributor 11 chars  showed as Distribut
+
+Smaller phones were fine, which is why this went unnoticed until now — the
+breakpoint was sitting just below the common case instead of just above it.
+
+At 430px the fallback covers everything up to Pro Max. Each field now gets
+about 163px. Anything wider than 430px keeps the original single-row layout.
+
+
+THE TRADE-OFF
+-------------
+Cards are about 46px taller on a phone, so roughly three quote lines fit on
+screen at once instead of four. That was the accepted cost of this option.
+
+If the extra scrolling becomes annoying on long quotes, the alternative we
+discussed is to move Baseline out of the input row entirely and show it
+full-width under the description. That fixes the same problem with no height
+cost, and the row drops to three real inputs. Say the word and it becomes
+2.5.0.
+
+
+AFTER DEPLOYING
+---------------
+Hard-refresh once (pull down to refresh in Safari). The service worker caches
+styles.css, so the old layout can persist for one load.
+
+You can delete this file once applied.

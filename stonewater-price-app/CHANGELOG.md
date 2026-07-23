@@ -6,6 +6,32 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.4.1] — Quote line fields no longer truncate on phones — 2026-07-23
+Patch. CSS only.
+
+### Fixed
+- **Baseline, Your price and Compare to clipped their values on every current
+  iPhone.** The quote line's four fields sit in a grid that falls back to two
+  columns on narrow screens — but the breakpoint was `max-width:380px`, and
+  modern iPhones are 390–430px CSS wide. They missed the fallback and kept all
+  four fields on one row at roughly 82px each, leaving about 64px of text
+  space: seven characters at the 14px monospace face.
+
+  `₹30,195` (7 chars) fit. `₹1,254.34` and `₹2,89,000` (9 chars) truncated to
+  `₹1,254…` and `₹2,89,…`, and the Compare-to select clipped `Distributor` to
+  `Distribut`. Smaller phones were unaffected, which is why this only surfaced
+  now.
+
+  The breakpoint is now `max-width:430px`, covering up to Pro Max. Each field
+  gets ~163px. Viewports above 430px keep the single-row layout.
+
+### Unchanged
+No HTML, JS, data or pricing logic. `site/styles.css` is the only file with a
+behavioural change. Cards are ~46px taller on phones as a result, so roughly
+three lines are visible at once rather than four.
+
+---
+
 ## [2.4.0] — Distributor baseline in the Quote Builder — 2026-07-23 · cache `stonewater-<commitSHA>`
 Minor. The Quote Builder's per-line **Compare to** selector gains a third
 baseline, **Distributor**, so an entered price can be measured against real
