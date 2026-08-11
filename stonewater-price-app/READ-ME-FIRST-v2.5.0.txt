@@ -1,0 +1,94 @@
+RGA Price App - v2.5.0 (arithmetic in the Quote Builder price field)
+=====================================================================
+
+READ THIS BEFORE EXTRACTING
+---------------------------
+This release is COMPLETE. Nothing is left for you to wire by hand.
+
+110 assertions pass across two test files, 57 of them driving the real handlers
+in a jsdom DOM. The layout was then verified in a real browser at 390px.
+
+NOTE: site/prices.json is deliberately NOT in this zip. Your generated
+catalogue is untouched.
+
+
+WHAT IS IN THE ZIP
+------------------
+  site/app.js                           MOD  the feature, implemented
+  site/index.html                       MOD  loads expr.js before app.js
+  site/sw.js                            MOD  expr.js added to the precache list
+  site/styles.css                       MOD  .qline position:relative + new block
+  site/expr.js                          NEW  parser, no eval, standalone
+  tests/price-expression.test.mjs       NEW  53 assertions (parser)
+  tests/quote-price-field.test.mjs      NEW  57 assertions (jsdom, real handlers)
+  tests/run-all.mjs                     NEW  runs every *.test.mjs
+  package.json                          MOD  version 2.5.0, test script is now a runner
+  CHANGELOG.md                          MOD  2.5.0 entry prepended
+  docs/PRD-v2.5.0-price-field-arithmetic.md   NEW  the locked spec
+  docs/REMAINING-STEPS.md               NEW  what was edited, and the phone checks
+  docs/v2.5.0-styles-append.css         NEW  append to styles.css, do not replace it
+  READ-ME-FIRST-v2.5.0.txt              this file
+
+Delete READ-ME-FIRST-v2.4.1.txt from the repo when you apply this.
+
+
+APPLYING
+--------
+Extract ON TOP of your existing stonewater-price-app folder and let it
+overwrite. Do NOT delete the folder first.
+
+  unzip -o rga-price-app-v2.5.0.zip -d /path/to/PARENT-of-stonewater-price-app
+
+Note "PARENT". Extracting inside the repo folder gives you a nested
+stonewater-price-app/stonewater-price-app/ and nothing takes effect.
+
+Then:
+
+  npm test          # 53 + 57 assertions, 2 test files, 0 failed
+  git add -A
+  git commit -m "v2.5.0 scaffolding - expression parser, tests, PRD"
+  # do NOT push yet if you want the release to land as one deploy
+
+`git status` should show new files plus modifications to exactly six:
+site/app.js, site/index.html, site/sw.js, site/styles.css, package.json and
+CHANGELOG.md. site/prices.json must NOT appear. Anything else means something
+from an earlier zip was never committed. Check before pushing.
+
+
+CHECK THESE FOUR THINGS ON THE PHONE
+------------------------------------
+1. Type a plain number into Your price. It must behave exactly as in 2.4.1.
+   This is the path used on every line and the one this release put at risk.
+2. Type 30195*0.9, tap the x key on the strip mid-expression, then tap away.
+   The strip must not vanish when you tap it, and the result must be 27176.
+3. Tap the resolved field again. It gives back 30195*0.9, not 27176.
+4. With two lines in the quote, focus the price field on the first. The second
+   card must not move. Verified at 390px in the build, worth confirming on
+   your own device.
+
+
+ONE DIVERGENCE FROM THE MOCKUPS, ON PURPOSE
+-------------------------------------------
+The mockups showed the field holding a formatted value at rest. The real field
+has always held a bare number, and formatting it would change the plain-number
+path on every line - the exact path this release was most at risk of breaking.
+So it still shows 27176, not ₹27,176. Changing that is a one-line edit if you
+want it, but it should be a deliberate decision, not a side effect.
+
+
+WHAT CHANGED IN BEHAVIOUR
+-------------------------
+Typing 30195*0.9 into Your price and tapping away gives 27,176, with a small
+fx 30195*0.9 line underneath. Tapping the field again brings the expression
+back, not the number.
+
+Prices resolve to whole rupees, rounded half away from zero. The rounded figure
+is the price and every total reads it. One consequence, accepted during scoping
+and recorded so it is not raised later: 500000/12 gives 41,667, and twelve of
+those is 500,004, not 500,000.
+
+Plain numbers behave exactly as they did in 2.4.1. That path is the one to
+re-test hardest after wiring, because it is used on every line and this release
+changes the field it lives in.
+
+You can delete this file once applied.

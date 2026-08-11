@@ -6,6 +6,75 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.5.0] - Arithmetic in the Quote Builder price field - 2026-08-11 · cache `stonewater-<commitSHA>`
+Minor. The per-line **Your price** field accepts an arithmetic expression and resolves it to a
+whole-rupee figure when the field loses focus. Front-end only; no data-model or `prices.json`
+changes. Specified in `docs/PRD-v2.5.0-price-field-arithmetic.md`.
+
+### Added
+- **Expression entry.** `30195*0.9` resolves to `₹27,176` on blur. Supports `+ - * /`, brackets,
+  unary minus, and pasted figures carrying commas or a rupee sign. A live `= ₹27,176` hint appears
+  under the field while typing.
+- **Expression trace.** The resolved line keeps a small `ƒx 30195*0.9` line beneath the price, and
+  re-focusing the field restores the expression for editing rather than the resolved number. A
+  quote reviewed later now shows how a price was arrived at, not just what it was.
+- **Operator strip.** A seven-key row (`+ − × ÷ ( ) CLR`) shown only while the price field has
+  focus, because `inputmode="decimal"` gives a keypad with no operator keys on iOS. It is
+  absolutely positioned over the line's totals row rather than inserted into the flow, so showing
+  and hiding it causes no reflow and no layout shift for the lines below.
+- **`site/expr.js`** - tokenizer plus recursive-descent parser. No `eval()`, no `new Function()`.
+  This app is passcode-gated and shows dealer and distributor cost, so a free-text field that
+  reaches an evaluator is a script-injection surface into a page holding commercial pricing.
+  Everything outside the grammar is rejected by the tokenizer before any arithmetic happens.
+- **Keystroke filtering** on `beforeinput` and `paste`. Characters outside the grammar never enter
+  the field, and two operators in a row are refused as they are typed.
+- `tests/price-expression.test.mjs` - 53 assertions covering the grammar, rounding, rejection,
+  keystroke filtering and the absence of any evaluator.
+- `tests/quote-price-field.test.mjs` - 57 assertions in jsdom, driving the real handlers in
+  `app.js`: input attributes, the plain-number path, hint and trace behaviour, resolution,
+  totals exclusion, keystroke filtering, and the strip's focus and visibility rules. 110 in total.
+- `tests/run-all.mjs`.
+- `expr.js` added to the `sw.js` precache list and loaded before `app.js` in `index.html`.
+- `position:relative` on `.qline` so the strip can anchor to the card.
+
+### Fixed during the build
+- **A layout shift the mockups hid.** The result hint and the `ƒx` trace were normal-flow nodes
+  under the input, so the card grew by about 19px the moment either appeared and every line below
+  it moved - the same failure the strip overlay was designed to avoid, arriving through the back
+  door. Both now share one always-present 15px slot and only one is ever visible. Measured in a
+  real browser at 390px: the second card sits at the identical offset when the field is empty,
+  mid-expression, showing an error and resolved.
+
+### Changed
+- **The price input is now `type="text"` with `inputmode="decimal"`.** `type="number"` returns an
+  empty string from `.value` as soon as the contents are invalid, so `5*2` could not be read at
+  all. The keystroke filter above replaces the validation that `type="number"` was providing.
+- **`npm test` now runs every `tests/*.test.mjs`** instead of one hard-coded file. On the old
+  script a second test file was silently never run, which looks green and is worse than no tests.
+
+### Note on existing behaviour
+`qINR()` already rounded at display time, so a price of `27175.5` displayed as `₹27,176` while the
+line total was computed from `27175.5`. Rounding at resolve closes that mismatch rather than
+introducing one.
+
+The price field continues to show a **bare number** at rest rather than a formatted `₹27,176`,
+which is how it has always behaved. Formatting it would have changed the plain-number path on
+every line.
+
+### Rounding
+Expressions resolve to the **nearest whole rupee, half away from zero**, and the rounded figure is
+the only value stored on the line. Every total reads it, never the unrounded intermediate.
+
+Accepted trade-off: division to hit a round target will miss it. `500000/12` resolves to `41667`,
+and `41667 × 12` is `500004`. The overshoot stays under a rupee per unit at any quantity. This is
+the cost of whole-rupee prices and it is recorded here so it is not reopened as a bug.
+
+### Not included
+Arithmetic in **Qty**, percent-off-baseline shorthand (`-12%`), cell references between lines, and
+saved or exported quotes. All four were considered and rejected during scoping.
+
+---
+
 ## [2.4.1] — Quote line fields no longer truncate on phones — 2026-07-23
 Patch. CSS only.
 

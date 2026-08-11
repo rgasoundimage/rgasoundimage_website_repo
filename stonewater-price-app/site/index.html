@@ -123,6 +123,9 @@
     </div>
   </div>
 
+  <!-- expr.js defines window.RGAExpr and MUST load before app.js: the quote
+       price field calls it on the first keystroke. -->
+  <script src="expr.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

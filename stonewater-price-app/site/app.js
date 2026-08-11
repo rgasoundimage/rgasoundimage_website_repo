@@ -517,6 +517,9 @@ function renderQuote() {
     <div class="qlines">${lines}</div>
     ${quoteBarHTML()}`;
   updateSummary();
+  // innerHTML wiped the trace nodes; repaint them for any line that carries
+  // an expression. (Keystroke updates never re-render — they patch by id.)
+  for (const l of quote) setTrace(l.uid, l.priceExpr);
 }
 
 function qLineHTML(line) {
@@ -549,7 +552,13 @@ function qLineHTML(line) {
       </label>
       <label class="qf">
         <span>Your price</span>
-        <input class="qprice" data-uid="${line.uid}" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="${line.price}" />
+        <input class="qprice" data-uid="${line.uid}" type="text" inputmode="decimal"
+               enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off"
+               spellcheck="false" placeholder="0" value="${esc(priceFieldValue(line))}" />
+        <div class="qexpr-slot">
+          <div class="qexpr-hint" id="eh-${line.uid}" hidden></div>
+          <div class="qexpr-trace" id="et-${line.uid}" hidden></div>
+        </div>
       </label>
       <label class="qf qf-qty">
         <span>Qty</span>
@@ -623,7 +632,7 @@ function addLine(prod) {
     brandId: prod.brandId, brandName: prod.brandName,
     model: prod.model, description: prod.description,
     retail: prod.retail, dealer: prod.dealer, dist: prod.dist,
-    basis, price: "", qty: 1,
+    basis, price: "", priceExpr: null, qty: 1,
   });
   renderQuote();
   if (!$("picker").hidden) renderPickResults($("pickSearch").value);   // refresh "Added" marks
@@ -633,6 +642,223 @@ function clearQuote() {
   if (!quote.length) return;
   if (confirm("Clear all products from this quote?")) { quote = []; renderQuote(); }
 }
+
+/* ==========================================================
+   v2.5.0 — arithmetic in the Your price field  (PRD §4)
+   ----------------------------------------------------------
+   Parsing lives in expr.js (window.RGAExpr): a tokenizer plus a
+   recursive-descent parser. No eval(), no new Function() — this app is
+   passcode-gated and shows dealer and distributor cost, so a free-text
+   field that reaches an evaluator is a script-injection surface into a
+   page holding commercial pricing.
+
+   Line state:
+     line.price      resolved value. Integer rupees once resolved, or ""
+                     when empty/unresolved. lineCalc() reads only this.
+     line.priceExpr  the expression it came from, or null. Display only:
+                     it is the trace, and it is what goes back in the
+                     field on re-focus. Never used in arithmetic.
+   ========================================================== */
+
+// What the input shows AT REST: the resolved number. The expression is put
+// back only on focus (see the focusin handler), per PRD §3a.
+// Deliberately NOT rupee-formatted — the field has always held a bare number,
+// and formatting it would change the plain-number path on every line, which
+// is the one path this release must not touch.
+function priceFieldValue(line) {
+  return (line.price === "" || line.price === null || line.price === undefined)
+    ? "" : String(line.price);
+}
+
+function setHint(uid, text, isError) {
+  const el = $("eh-" + uid);
+  if (!el) return;
+  if (!text) { el.hidden = true; el.textContent = ""; el.className = "qexpr-hint"; return; }
+  el.hidden = false;
+  el.textContent = text;
+  el.className = isError ? "qexpr-hint qexpr-hint--error" : "qexpr-hint";
+}
+function setTrace(uid, expr) {
+  const el = $("et-" + uid);
+  if (!el) return;
+  if (!expr) { el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="qexpr-badge">\u0192x</span>' + esc(expr);
+}
+function setPriceError(input, on) {
+  if (input) input.classList.toggle("is-expr-error", !!on);
+}
+
+/* --- live, on every keystroke (PRD §4.3) ---------------------------------
+   A plain number still updates the totals live, exactly as it did in 2.4.1.
+   An expression holds the line out of the totals until it resolves on blur,
+   which is the same rule an empty price has followed since 2.2.0. */
+function priceInputLive(line, input) {
+  const r = RGAExpr.evaluate(input.value);
+  setPriceError(input, false);
+  if (r.state === "ok" && !r.isExpression) {
+    line.price = input.value;              // unchanged 2.4.1 behaviour
+    setHint(line.uid, "");
+  } else if (r.state === "ok") {
+    line.price = "";
+    setHint(line.uid, "= " + qINR(r.value), false);
+  } else if (r.state === "invalid") {
+    line.price = "";
+    setHint(line.uid, "Can't work that out", true);
+    setPriceError(input, true);
+  } else {
+    // empty, or incomplete mid-keystroke: no hint, and no error flash.
+    line.price = "";
+    setHint(line.uid, "");
+  }
+}
+
+/* --- resolve on blur (PRD §3b, §4.3) -------------------------------------
+   The rounded whole-rupee figure is the price. It is the only value stored
+   and the only value lineCalc() ever sees. Nothing downstream may read the
+   unrounded intermediate, or price × qty stops matching the line total. */
+function priceResolve(line, input) {
+  const r = RGAExpr.evaluate(input.value);
+  if (r.state === "ok") {
+    line.price = r.value;
+    line.priceExpr = r.isExpression ? r.raw : null;
+    input.value = String(r.value);
+    setPriceError(input, false);
+    setHint(line.uid, "");
+    setTrace(line.uid, line.priceExpr);
+  } else if (r.state === "empty") {
+    line.price = "";
+    line.priceExpr = null;
+    input.value = "";
+    setPriceError(input, false);
+    setHint(line.uid, "");
+    setTrace(line.uid, null);
+  } else {
+    // invalid, or incomplete at the moment focus left. Keep the text exactly
+    // as typed so it can be corrected; the line stays out of the totals.
+    line.price = "";
+    line.priceExpr = null;
+    setPriceError(input, true);
+    setHint(line.uid, "Can't work that out", true);
+    setTrace(line.uid, null);
+  }
+  updateLineComputed(line.uid);
+  updateSummary();
+}
+
+/* --- the operator strip (PRD §4.5.1) -------------------------------------
+   inputmode="decimal" gives a keypad with no operator keys on iOS. One strip
+   exists and is moved into whichever .qline has focus. It is positioned
+   absolutely over .qline-calc, so showing and hiding it causes no reflow and
+   the lines below never shift under a finger mid-tap. */
+const QEXPR_KEYS = [
+  { label: "+",   ch: "+" },
+  { label: "\u2212", ch: "-" },
+  { label: "\u00D7", ch: "*" },
+  { label: "\u00F7", ch: "/" },
+  { label: "(",   ch: "(",  secondary: true },
+  { label: ")",   ch: ")",  secondary: true },
+  { label: "CLR", ch: null, secondary: true },
+];
+let stripEl = null;
+let activePrice = null;
+
+function buildStrip() {
+  if (stripEl) return stripEl;
+  stripEl = document.createElement("div");
+  stripEl.className = "qexpr-strip";
+  stripEl.setAttribute("aria-hidden", "true");   // the keys duplicate typing
+  stripEl.innerHTML = QEXPR_KEYS.map((k) =>
+    '<button type="button" tabindex="-1" class="qexpr-key' +
+    (k.secondary ? " qexpr-key--secondary" : "") + '"' +
+    (k.ch === null ? ' data-clear="1"' : ' data-ch="' + esc(k.ch) + '"') +
+    '>' + esc(k.label) + '</button>').join("");
+
+  // pointerdown + preventDefault, NOT click. A click handler lets the tap
+  // blur the input first: the strip vanishes under the finger and the
+  // half-typed expression resolves as invalid.
+  stripEl.addEventListener("pointerdown", (e) => {
+    const key = e.target.closest(".qexpr-key");
+    if (!key) return;
+    e.preventDefault();
+    const inp = activePrice;
+    if (!inp) return;
+    if (key.dataset.clear) {
+      inp.value = "";
+      inp.setSelectionRange(0, 0);
+    } else {
+      insertAtCaret(inp, key.dataset.ch);
+    }
+    inp.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  return stripEl;
+}
+
+function insertAtCaret(inp, ch) {
+  const start = inp.selectionStart == null ? inp.value.length : inp.selectionStart;
+  const end = inp.selectionEnd == null ? start : inp.selectionEnd;
+  const next = inp.value.slice(0, start) + ch + inp.value.slice(end);
+  if (!RGAExpr.isAcceptableValue(next)) return;   // same rule as typing
+  inp.value = next;
+  const pos = start + ch.length;
+  inp.setSelectionRange(pos, pos);
+}
+
+function showStrip(input) {
+  const qline = input.closest(".qline");
+  if (!qline) return;
+  qline.appendChild(buildStrip());
+  stripEl.hidden = false;
+}
+function hideStrip() {
+  if (stripEl) stripEl.hidden = true;
+}
+
+/* --- keystroke filtering (PRD §4.5.2) ------------------------------------
+   The field is type="text" now, so this is what replaces the validation
+   type="number" used to provide. Characters outside the grammar never enter
+   the value at all. */
+$("quote").addEventListener("beforeinput", (e) => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains("qprice")) return;
+  if (!e.inputType || e.inputType.indexOf("delete") === 0 || e.inputType.indexOf("history") === 0) return;
+  const data = e.data == null ? (e.dataTransfer ? e.dataTransfer.getData("text") : "") : e.data;
+  if (data === "") return;
+  const start = t.selectionStart == null ? t.value.length : t.selectionStart;
+  const end = t.selectionEnd == null ? start : t.selectionEnd;
+  const next = t.value.slice(0, start) + data + t.value.slice(end);
+  if (!RGAExpr.isAcceptableValue(next)) e.preventDefault();
+});
+
+/* --- focus in and out ----------------------------------------------------- */
+$("quote").addEventListener("focusin", (e) => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains("qprice")) return;
+  const line = quote.find((l) => l.uid === t.dataset.uid);
+  if (!line) return;
+  activePrice = t;
+  // Re-editing gives back the expression, not the number it resolved to.
+  if (line.priceExpr) t.value = line.priceExpr;
+  showStrip(t);
+});
+
+$("quote").addEventListener("focusout", (e) => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains("qprice")) return;
+  // A tap on a strip key is itself a blur. Ignore it: focus never really left.
+  if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".qexpr-strip")) return;
+  const line = quote.find((l) => l.uid === t.dataset.uid);
+  activePrice = null;
+  hideStrip();
+  if (!line) return;
+  priceResolve(line, t);
+});
+
+$("quote").addEventListener("keydown", (e) => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains("qprice")) return;
+  if (e.key === "Enter") { e.preventDefault(); t.blur(); }
+});
 
 /* ----- delegated events on the quote view ----- */
 $("quote").addEventListener("click", (e) => {
@@ -648,8 +874,8 @@ $("quote").addEventListener("input", (e) => {
   const t = e.target;
   const line = quote.find((l) => l.uid === t.dataset.uid);
   if (!line) return;
-  if (t.classList.contains("qprice")) line.price = t.value;
-  else if (t.classList.contains("qqty")) line.qty = t.value;
+  if (t.classList.contains("qprice")) priceInputLive(line, t);
+  else if (t.classList.contains("qqty")) line.qty = t.value;   // Qty stays a plain integer field
   else return;
   updateLineComputed(line.uid);
   updateSummary();

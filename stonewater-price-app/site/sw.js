@@ -2,7 +2,7 @@
    v2 — network-first so redeploys show up on reload, cache fallback for offline */
 const CACHE = "stonewater-dev";
 const ASSETS = [
-  "./", "index.html", "styles.css", "app.js", "prices.json",
+  "./", "index.html", "styles.css", "app.js", "expr.js", "prices.json",
   "manifest.webmanifest",
   "icons/rga-logo.png",
   // ?v= is deliberate. netlify.toml serves /icons/* with `immutable`, so a client

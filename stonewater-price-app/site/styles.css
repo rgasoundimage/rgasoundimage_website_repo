@@ -250,6 +250,9 @@ button,input,select{font-family:inherit}
 
 .qlines{display:flex;flex-direction:column;gap:10px}
 .qline{
+  /* position:relative anchors .qexpr-strip, which overlays .qline-calc while the
+     price field has focus. Without it the strip escapes to the viewport. */
+  position:relative;
   background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;
   padding:12px 12px 10px;
 }
@@ -388,3 +391,103 @@ button,input,select{font-family:inherit}
   outline:2px solid var(--text);
   outline-offset:2px;
 }
+
+/* ============================================================
+   v2.5.0 - price-field arithmetic
+   APPEND to the end of site/styles.css. Do not replace the file.
+
+   Grounded in the real stylesheet: this uses the existing token names
+   (--border, --border-soft, --surface2, --surface3, --muted, --muted2,
+   --mono, --sans, --ok, --danger, --amber-dim) and the real class hooks
+   (.qline, .qline-grid, .qline-calc, .qf, .qprice). Token names survived
+   the 2.3.0 light-theme change - they were re-pointed, not renamed.
+
+   ONE structural edit is still required in the existing stylesheet and
+   cannot come from an appended block:
+
+       .qline{ position:relative; }
+
+   The strip is mispositioned without it.
+   ============================================================ */
+
+/* --- operator strip (PRD 4.5.1, 4.5.1b) ------------------------------
+   Absolutely positioned over .qline-calc so show/hide causes NO reflow.
+   Never make this a normal-flow row: a ~55px height change on focus moves
+   every line below it and mis-aims the next tap. */
+.qexpr-strip{
+  position:absolute;
+  left:12px; right:12px; bottom:11px;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  background:var(--surface);   /* .qline's own background - must be opaque */
+  padding-top:9px;
+  border-top:1px solid var(--border);
+}
+/* Hidden is hidden. No transition, no fade - the field resolves on blur,
+   so an animation here is a visible flicker on every price entry. */
+.qexpr-strip[hidden]{display:none}
+
+.qexpr-key{
+  height:40px; min-width:0;
+  background:var(--surface2); color:var(--text);
+  border:1px solid var(--border); border-radius:9px;
+  font-family:var(--mono); font-size:17px; font-weight:600; line-height:1;
+  display:grid; place-items:center;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;
+}
+.qexpr-key--secondary{font-size:13px;color:var(--muted2)}
+.qexpr-key:active{background:var(--surface3)}
+.qexpr-key:focus-visible{outline:2px solid var(--amber-dim);outline-offset:2px}
+
+/* --- fixed-height slot under the price input --------------------------
+   The hint and the trace occupy the SAME slot and only one is ever shown.
+   The slot is always present and always 15px tall, so the card height is
+   identical whether the field is empty, mid-expression, showing an error
+   or resolved with a trace. Without this the card grows ~19px the moment a
+   hint or trace appears and every line below shifts - the same failure the
+   strip overlay was designed to avoid, arriving through the back door. */
+.qexpr-slot{position:relative;height:15px;flex:0 0 15px}
+.qexpr-slot>*{position:absolute;left:0;right:0;top:0;margin-top:0}
+
+/* --- live result hint while editing (PRD 4.3) ------------------------
+   Sits inside the .qf that wraps .qprice, below the input. */
+.qexpr-hint{
+  font-family:var(--mono); font-size:11px; font-weight:600; line-height:1.3;
+  font-variant-numeric:tabular-nums;
+  color:var(--ok);
+}
+.qexpr-hint--error{color:var(--danger);font-family:var(--sans);font-weight:500}
+.qexpr-hint[hidden]{display:none}
+
+/* --- resolved-expression trace, shown at rest (PRD 3a) ---------------- */
+.qexpr-trace{
+  font-family:var(--mono); font-size:10.5px; line-height:1.3;
+  color:var(--muted2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.qexpr-trace[hidden]{display:none}
+
+.qexpr-badge{
+  display:inline-block; margin-right:5px; padding:1px 4px;
+  background:var(--surface2); border:1px solid var(--border-soft); border-radius:4px;
+  color:var(--muted2);
+  font-family:var(--sans); font-size:9px; font-weight:700; font-style:italic; line-height:1.4;
+  vertical-align:1px;
+}
+
+/* --- error state on the input ----------------------------------------
+   .qf input:focus sets border-color:var(--amber-dim); this has to win. */
+.qf input.qprice.is-expr-error,
+.qf input.qprice.is-expr-error:focus{
+  border-color:var(--danger);
+  box-shadow:0 0 0 3px rgba(179,38,30,.10);
+}
+
+/* The spin-button suppression in .qf already targets input[type=number].
+   .qprice is type="text" from 2.5.0, so those rules simply stop applying.
+   Nothing to remove - but keep tabular numerals aligned with the row. */
+.qprice{font-variant-numeric:tabular-nums}
