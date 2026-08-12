@@ -33,7 +33,9 @@ changes. Specified in `docs/PRD-v2.5.0-price-field-arithmetic.md`.
 - `tests/quote-price-field.test.mjs` - 57 assertions in jsdom, driving the real handlers in
   `app.js`: input attributes, the plain-number path, hint and trace behaviour, resolution,
   totals exclusion, keystroke filtering, and the strip's focus and visibility rules. 110 in total.
-- `tests/run-all.mjs`.
+- `tests/run-all.mjs` now spawns each test file as its own child process, so a
+  file ending in `process.exit()` (the original `quote-distributor.test.mjs`)
+  can no longer terminate the suite before later files run.
 - `expr.js` added to the `sw.js` precache list and loaded before `app.js` in `index.html`.
 - `position:relative` on `.qline` so the strip can anchor to the card.
 

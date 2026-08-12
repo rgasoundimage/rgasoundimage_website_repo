@@ -5,11 +5,12 @@ READ THIS BEFORE EXTRACTING
 ---------------------------
 This release is COMPLETE. Nothing is left for you to wire by hand.
 
-110 assertions pass across two test files, 57 of them driving the real handlers
-in a jsdom DOM. The layout was then verified in a real browser at 390px.
+152 assertions pass across THREE test files (53 parser + 42 your original
+distributor tests + 57 quote-field), 0 failed. The layout was verified in a
+real browser at 390px.
 
-NOTE: site/prices.json is deliberately NOT in this zip. Your generated
-catalogue is untouched.
+NOTE: this is the COMPLETE repo. Your real 191-product prices.json and both
+source .xlsx files are included and unchanged — they came from your own backup.
 
 
 WHAT IS IN THE ZIP
@@ -21,6 +22,8 @@ WHAT IS IN THE ZIP
   site/expr.js                          NEW  parser, no eval, standalone
   tests/price-expression.test.mjs       NEW  53 assertions (parser)
   tests/quote-price-field.test.mjs      NEW  57 assertions (jsdom, real handlers)
+  tests/quote-distributor.test.mjs      KEPT your original 42 (restored)
+  tests/run-all.mjs                     NEW  spawns each test file separately
   tests/run-all.mjs                     NEW  runs every *.test.mjs
   package.json                          MOD  version 2.5.0, test script is now a runner
   CHANGELOG.md                          MOD  2.5.0 entry prepended
@@ -32,27 +35,44 @@ WHAT IS IN THE ZIP
 Delete READ-ME-FIRST-v2.4.1.txt from the repo when you apply this.
 
 
-APPLYING
---------
-Extract ON TOP of your existing stonewater-price-app folder and let it
-overwrite. Do NOT delete the folder first.
+APPLYING (this is a COMPLETE folder, not an overlay)
+----------------------------------------------------
+This zip is the ENTIRE repo. Every file the app needs is inside it — including
+your original tests, build_prices.py, scripts/, netlify.toml, icons, data/ and
+your real prices.json. That is deliberate: replacing the whole folder means
+nothing that should be there can go missing.
 
-  unzip -o rga-price-app-v2.5.0.zip -d /path/to/PARENT-of-stonewater-price-app
+SAFEST METHOD — rename the old, unzip the new:
 
-Note "PARENT". Extracting inside the repo folder gives you a nested
-stonewater-price-app/stonewater-price-app/ and nothing takes effect.
+  cd /path/to/PARENT-of-stonewater-price-app
+  mv stonewater-price-app stonewater-price-app.bak
+  unzip rga-price-app-v2.5.0.zip
+  # verify, then delete the .bak once you are happy
 
-Then:
+DO NOT drag this folder onto the old one in Finder and choose "Replace" as a
+way to "merge". Finder's Replace is fine HERE because the zip is complete, but
+it is the exact action that deleted your files last time when the folder was
+only partial. The rename method above avoids the question entirely.
 
-  npm test          # 53 + 57 assertions, 2 test files, 0 failed
-  git add -A
-  git commit -m "v2.5.0 scaffolding - expression parser, tests, PRD"
-  # do NOT push yet if you want the release to land as one deploy
+Because this is a full folder, git is your safety net. After unzipping:
 
-`git status` should show new files plus modifications to exactly six:
-site/app.js, site/index.html, site/sw.js, site/styles.css, package.json and
-CHANGELOG.md. site/prices.json must NOT appear. Anything else means something
-from an earlier zip was never committed. Check before pushing.
+  cd stonewater-price-app
+  git status
+
+Expect modifications to site/app.js, site/index.html, site/sw.js,
+site/styles.css, package.json and CHANGELOG.md, plus new files under docs/,
+tests/ and site/expr.js. If git status shows DELETIONS, stop — something is
+missing from the zip. Do not commit until that is understood.
+
+Delete READ-ME-FIRST-v2.4.1.txt from the repo — it is stale.
+
+
+VERIFY BEFORE PUSHING
+---------------------
+  npm test        # expect 3 files: 53 + 42 + 57 assertions, 0 failed
+
+The 42 are your original distributor tests — if you see only two files run,
+tests/quote-distributor.test.mjs did not make it in.
 
 
 CHECK THESE FOUR THINGS ON THE PHONE
