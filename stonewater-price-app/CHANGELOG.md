@@ -6,6 +6,23 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.5.1] - Quote module UI fixes - 2026-08-18 · cache `stonewater-<commitSHA>`
+Patch. Presentation only. Three CSS fixes in the Quote Builder; no JavaScript, HTML, data-model,
+or `prices.json` changes. Specified in `docs/PRD-v2.5.1-quote-ui-fixes.md`; tracked as BUG-002/003/004.
+
+### Fixed
+- **Picker search legibility (BUG-002).** The Add-product search field kept an opaque white fill on
+  focus instead of collapsing to the sheet tint, so typed text stays solid navy and the field keeps
+  a visible 2px edge. Text colour is forced with a `-webkit-text-fill-color` fallback for iOS.
+- **Picker sheet no longer drifts (BUG-003).** The results region has a fixed height, so narrowing or
+  widening the matches no longer moves the title or search field. The sheet is bottom-anchored, so
+  previously a shorter list pushed the whole header downward.
+- **Summary bar bleed-through (BUG-004).** The sticky totals bar now has an opaque fill (`#F4F5F8`),
+  so product cards scrolling behind it are no longer visible through it. It was 96% transparent
+  (`--surface2`); positioning was already correct.
+
+---
+
 ## [2.5.0] - Arithmetic in the Quote Builder price field - 2026-08-11 · cache `stonewater-<commitSHA>`
 Minor. The per-line **Your price** field accepts an arithmetic expression and resolves it to a
 whole-rupee figure when the field loses focus. Front-end only; no data-model or `prices.json`

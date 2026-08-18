@@ -1,12 +1,35 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { BRAND } from "../config/brand";
 import Logo from "../components/common/Logo";
 
+const NAV_LINKS = [
+  { to: "/", label: "Home" },
+  { to: "/about", label: "About" },
+  { to: "/products", label: "Products" },
+  { to: "/projects", label: "Projects" },
+  { to: "/contact", label: "Contact" },
+  { to: "/insights", label: "Insights" },
+  { to: "/pay-invoice", label: "Pay Invoice" },
+];
+
 export default function Header() {
-    const location = useLocation();
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+      if (!menuOpen) return;
+
+      const handleClickOutside = (e) => {
+        if (menuRef.current && !menuRef.current.contains(e.target)) {
+          setMenuOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [menuOpen]);
 
     return (
         <header
@@ -31,85 +54,64 @@ export default function Header() {
                 </span>
               </div>
             </Link>
-    
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              <NavLink to="/" label="Home" current={location.pathname === "/"} />
-              <NavLink
-                to="/about"
-                label="About"
-                current={location.pathname.startsWith("/about")}
-              />
-              <NavLink
-                to="/products"
-                label="Products"
-                current={location.pathname.startsWith("/products")}
-              />
-              <NavLink
-                to="/projects"
-                label="Projects"
-                current={location.pathname.startsWith("/projects")}
-              />
-              <NavLink
-                to="/contact"
-                label="Contact"
-                current={location.pathname.startsWith("/contact")}
-              />
-              <NavLink
-                to="/insights"
-                label="Insights"
-                current={location.pathname.startsWith("/insights")}
-              />
-            </nav>
-    
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2 rounded-lg hover:bg-slate-100"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Open menu"
-            >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          </div>
-    
-          {/* Mobile menu */}
-          {mobileOpen && (
-            <div className="md:hidden border-t bg-white border-slate-200">
-              <nav className="px-4 py-6 flex flex-col gap-4 text-sm items-center text-center">
-                <Link to="/" onClick={() => setMobileOpen(false)}>
-                  Home
-                </Link>
-                <Link to="/about" onClick={() => setMobileOpen(false)}>
-                  About
-                </Link>
-                <Link to="/products" onClick={() => setMobileOpen(false)}>
-                  Products
-                </Link>
-                <Link to="/projects" onClick={() => setMobileOpen(false)}>
-                  Projects
-                </Link>
-                <Link to="/contact" onClick={() => setMobileOpen(false)}>
-                  Contact
-                </Link>
-                <Link to="/insights" onClick={() => setMobileOpen(false)}>
-                  Insights
-                </Link>
-              </nav>
+
+            {/* Menu button + dropdown */}
+            <div className="relative" ref={menuRef}>
+              <button
+                className="p-2 rounded-lg hover:bg-slate-100"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="Open menu"
+                aria-expanded={menuOpen}
+              >
+                <HamburgerIcon open={menuOpen} />
+              </button>
+
+              <AnimatePresence>
+                {menuOpen && (
+                  <Motion.nav
+                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40 text-sm"
+                  >
+                    {NAV_LINKS.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setMenuOpen(false)}
+                        className="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </Motion.nav>
+                )}
+              </AnimatePresence>
             </div>
-          )}
+          </div>
         </header>
       );
     }
-    
-    function NavLink({ to, label, current }) {
+
+    function HamburgerIcon({ open }) {
       return (
-        <Link
-          to={to}
-          className={`transition hover:text-slate-900 ${
-            current ? "text-slate-900" : "text-slate-600"
-          }`}
-        >
-          {label}
-        </Link>
+        <div className="relative w-5 h-4">
+          <span
+            className={`absolute left-0 top-0 w-5 h-0.5 bg-slate-900 rounded-full transition-transform duration-300 ease-in-out ${
+              open ? "translate-y-[7px]" : ""
+            }`}
+          />
+          <span
+            className={`absolute left-0 top-1/2 -translate-y-1/2 w-5 h-0.5 bg-slate-900 rounded-full transition-opacity duration-200 ease-in-out ${
+              open ? "opacity-0" : "opacity-100"
+            }`}
+          />
+          <span
+            className={`absolute left-0 bottom-0 w-5 h-0.5 bg-slate-900 rounded-full transition-transform duration-300 ease-in-out ${
+              open ? "-translate-y-[7px]" : ""
+            }`}
+          />
+        </div>
       );
     }

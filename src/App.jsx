@@ -12,6 +12,7 @@ import Contact from "./pages/Contact";
 import Chatbot from "./components/Chatbot";
 import Blog from "./pages/Blog";
 import Article from "./pages/Article.jsx";
+import PayInvoice from "./pages/PayInvoice.jsx";
 
 
 const Shell = ({ children }) => (
@@ -37,6 +38,8 @@ export default function App({ enableAnalytics = true, enableChatbot = true }) {
           {/* Insights / Blog */}
           <Route path="/insights" element={<Blog />} />
           <Route path="/insights/:slug" element={<Article />} />
+
+          <Route path="/pay-invoice" element={<PayInvoice />} />
         </Routes>
 
         {/* Chatbot lives here */}

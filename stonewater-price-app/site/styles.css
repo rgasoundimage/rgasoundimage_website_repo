@@ -311,9 +311,15 @@ button,input,select{font-family:inherit}
 }
 
 /* sticky summary bar */
+/* BUG-004: --surface2 is rgba(20,25,67,.04) — 96% transparent — so product
+   cards scrolling behind this sticky bar showed straight through it and looked
+   like a collision. The bar was positioned correctly; it just needed an OPAQUE
+   fill. #F4F5F8 is that same navy-4%-on-white tint, flattened to solid. The bar
+   stays in normal flow (sticky does not remove it), so the last card still has
+   room to scroll clear above its resting position — no extra spacer needed. */
 .qbar{
   position:sticky;bottom:calc(8px + var(--safe-b));margin-top:14px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  background:#F4F5F8;border:1px solid var(--border);border-radius:14px;
   padding:12px 14px;box-shadow:0 -8px 24px rgba(20,25,67,.10);
 }
 .qsum-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:13px;color:var(--muted)}
@@ -331,17 +337,31 @@ button,input,select{font-family:inherit}
 /* Product picker                                            */
 /* ========================================================= */
 .pickbar{margin-bottom:10px}
+/* BUG-002: keep an opaque white fill in BOTH states so the field never merges
+   into the sheet's --surface2 tint, and force the text colour with a WebKit
+   fallback (iOS can otherwise override the declared `color` on type=search).
+   Focus grows the border to 2px navy for a readable edge; padding drops 1px to
+   absorb the border so nothing shifts. */
 #pickSearch{
   width:100%;background:var(--surface);border:1px solid var(--border);
-  border-radius:11px;padding:13px 14px;font-size:16px;color:var(--text);
+  border-radius:11px;padding:13px 14px;font-size:16px;
+  color:var(--text);-webkit-text-fill-color:var(--text);caret-color:var(--text);
 }
-#pickSearch:focus{outline:none;border-color:var(--amber-dim);background:var(--surface2)}
+#pickSearch::placeholder{color:var(--muted2);-webkit-text-fill-color:var(--muted2)}
+#pickSearch:focus{outline:none;background:var(--surface);border:2px solid var(--text);padding:12px 13px}
 #pickSearch::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
 .pickadded{
   font-size:12px;color:var(--ok);background:#E9F5EF;border:1px solid rgba(21,127,79,.32);
   border-radius:8px;padding:7px 10px;margin-bottom:10px;font-weight:600;
 }
+/* BUG-003: the picker sheet is bottom-anchored (.modal{align-items:flex-end})
+   with content-driven height, so as results narrow the sheet shrinks from its
+   TOP edge and the search field slides down under the user. Giving the results
+   region a FIXED height makes the sheet's overall height constant, so the
+   header and search field hold still; only this list changes/scrolls.
+   Scoped via the #pickResults id, so nothing else is affected. */
 .pickresults{max-height:48vh;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:6px}
+#pickResults{height:46vh;max-height:46vh}
 .pickrow{
   width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;
   background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;padding:11px 12px;
