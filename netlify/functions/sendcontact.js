@@ -37,7 +37,7 @@ export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      body: "Method Not Allowed",
+      body: JSON.stringify({ error: "Method Not Allowed" }),
     };
   }
 
@@ -61,14 +61,14 @@ export async function handler(event) {
     if (!name || !email || !phone || !city || !state || !message) {
       return {
         statusCode: 400,
-        body: "Missing required fields",
+        body: JSON.stringify({ error: "Please fill in all required fields." }),
       };
     }
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
       return {
         statusCode: 400,
-        body: "Invalid email",
+        body: JSON.stringify({ error: "Please enter a valid email address." }),
       };
     }
 
@@ -89,7 +89,7 @@ export async function handler(event) {
       console.error("contact insert failed:", dbError);
       return {
         statusCode: 500,
-        body: "Could not save submission",
+        body: JSON.stringify({ error: "Could not save submission. Please try again or call us directly." }),
       };
     }
 
@@ -137,7 +137,7 @@ export async function handler(event) {
 
     return {
       statusCode: 500,
-      body: "Failed to process submission",
+      body: JSON.stringify({ error: "Something went wrong on our end. Please try again or call us directly." }),
     };
   }
 }

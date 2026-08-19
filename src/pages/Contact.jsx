@@ -41,10 +41,12 @@ export default function Contact() {
 
       if (!res.ok) {
         setStatus("error");
+        const errBody = await res.json().catch(() => ({}));
         setErrorMessage(
-          res.status === 429
-            ? "Too many submissions. Please wait a minute and try again."
-            : "Something went wrong on our end. Please try again or call us directly."
+          errBody.error ||
+            (res.status === 429
+              ? "Too many submissions. Please wait a minute and try again."
+              : "Something went wrong on our end. Please try again or call us directly.")
         );
         return;
       }
