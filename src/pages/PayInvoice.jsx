@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Send } from "lucide-react";
 
 const RAZORPAY_SCRIPT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -163,16 +163,33 @@ export default function PayInvoice() {
                   </p>
                 )}
 
-                <Button
-                  type="button"
-                  className={`w-full rounded-2xl transition ${
-                    canPay ? "ring-2 ring-offset-2 ring-slate-900" : "opacity-50 cursor-not-allowed"
-                  }`}
-                  disabled={!canPay}
-                  onClick={handlePay}
-                >
-                  {status === "loading" ? "Starting payment..." : "Pay Invoice"}
-                </Button>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    disabled={!canPay}
+                    onClick={handlePay}
+                    className={`w-full flex items-center justify-center gap-3 rounded-full bg-gradient-to-b from-slate-800 to-black px-5 py-3.5 text-white shadow-md transition ${
+                      canPay ? "hover:from-slate-700 hover:to-slate-900" : "opacity-50 cursor-not-allowed"
+                    }`}
+                  >
+                    <Send className="h-4 w-4 -rotate-45" strokeWidth={2.5} />
+                    <span className="font-semibold tracking-wide">
+                      {status === "loading" ? "Starting payment..." : "Pay Invoice"}
+                    </span>
+                    <span className="flex items-center gap-1 rounded-md bg-white px-2 py-1">
+                      <span className="text-[10px] font-bold italic text-blue-700">VISA</span>
+                      <span className="flex -space-x-1.5">
+                        <span className="h-3 w-3 rounded-full bg-red-500" />
+                        <span className="h-3 w-3 rounded-full bg-amber-400" />
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-700">UPI</span>
+                    </span>
+                  </button>
+
+                  <p className="text-center text-xs text-slate-500">
+                    Secured by <span className="font-semibold text-slate-700">Razorpay</span>
+                  </p>
+                </div>
               </div>
             )}
           </CardContent>
