@@ -1,4 +1,11 @@
 import nodemailer from "nodemailer";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { persistSession: false } }
+);
 
 function escapeHtml(str) {
   return String(str ?? "")
@@ -58,6 +65,34 @@ export async function handler(event) {
       };
     }
 
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
+      return {
+        statusCode: 400,
+        body: "Invalid email",
+      };
+    }
+
+    // Persist first — an enquiry that's saved but failed to email is
+    // recoverable from the DB; one that emailed but never saved isn't.
+    const { error: dbError } = await supabase.from("contact_submissions").insert({
+      name: String(name).trim().slice(0, 255),
+      email: String(email).trim().slice(0, 320),
+      phone: String(phone).trim().slice(0, 32),
+      city: String(city).trim().slice(0, 255),
+      state: String(state).trim().slice(0, 255),
+      message: String(message).trim(),
+      source_page: event.headers.referer || null,
+      user_agent: event.headers["user-agent"] || null,
+    });
+
+    if (dbError) {
+      console.error("contact insert failed:", dbError);
+      return {
+        statusCode: 500,
+        body: "Could not save submission",
+      };
+    }
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
@@ -85,18 +120,24 @@ export async function handler(event) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Best-effort — the submission is already saved, so a flaky SMTP
+    // connection shouldn't turn into a failure the visitor sees.
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (emailError) {
+      console.error("Contact email error (submission was still saved):", emailError);
+    }
 
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true }),
     };
   } catch (error) {
-    console.error("Contact email error:", error);
+    console.error("Contact submission error:", error);
 
     return {
       statusCode: 500,
-      body: "Failed to send email",
+      body: "Failed to process submission",
     };
   }
 }
