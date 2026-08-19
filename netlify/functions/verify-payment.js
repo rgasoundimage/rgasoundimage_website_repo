@@ -1,9 +1,9 @@
 // netlify/functions/verify-payment.js
 // Verifies the HMAC-SHA256 signature Razorpay returns after a successful checkout.
 // Only treat a payment as confirmed if this returns verified: true.
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }

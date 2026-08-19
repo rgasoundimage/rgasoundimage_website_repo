@@ -1,8 +1,8 @@
 // netlify/functions/create-order.js
 // Creates a Razorpay order server-side. Amount must be in paise (INR smallest unit).
-const Razorpay = require('razorpay');
+import Razorpay from 'razorpay';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
