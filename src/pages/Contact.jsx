@@ -4,9 +4,11 @@ import ReactGA from "react-ga4";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import SEO from "../components/SEO";
 import { createBreadcrumbJsonLd, pageSeo } from "../config/seo";
+import { INDIAN_STATES } from "../data/indianStates";
 
 export default function Contact() {
   const [status, setStatus] = useState("idle"); // "idle" | "loading" | "success" | "error"
@@ -24,6 +26,8 @@ export default function Contact() {
       name: form.name.value,
       email: form.email.value,
       phone: form.phone.value,
+      city: form.city.value,
+      state: form.state.value,
       message: form.message.value,
       _honey: form._honey.value,
     };
@@ -50,7 +54,7 @@ export default function Contact() {
       setStatus("success");
 
       const whatsappText = encodeURIComponent(
-        `Hi RGA Sound Image,\n\nName: ${payload.name}\nEmail: ${payload.email}\nPhone: ${payload.phone}\n\nMessage:\n${payload.message}`
+        `Hi RGA Sound Image,\n\nName: ${payload.name}\nEmail: ${payload.email}\nPhone: ${payload.phone}\nCity: ${payload.city}\nState: ${payload.state}\n\nMessage:\n${payload.message}`
       );
       window.open(`https://wa.me/917981035920?text=${whatsappText}`, "_blank");
     } catch {
@@ -122,8 +126,30 @@ export default function Contact() {
                 <Input
                   name="phone"
                   placeholder="Phone"
+                  required
                   disabled={status === "loading"}
                 />
+                <Input
+                  name="city"
+                  placeholder="City"
+                  required
+                  disabled={status === "loading"}
+                />
+                <Select
+                  name="state"
+                  required
+                  disabled={status === "loading"}
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select state
+                  </option>
+                  {INDIAN_STATES.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </Select>
                 <Textarea
                   name="message"
                   placeholder="Tell us about your project"

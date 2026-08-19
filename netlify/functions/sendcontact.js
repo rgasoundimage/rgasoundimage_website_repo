@@ -43,7 +43,7 @@ export async function handler(event) {
   }
 
   try {
-    const { name, email, phone, message, _honey } = JSON.parse(event.body);
+    const { name, email, phone, city, state, message, _honey } = JSON.parse(event.body);
 
     // Honeypot: bots fill hidden fields, humans don't
     if (_honey) {
@@ -51,7 +51,7 @@ export async function handler(event) {
     }
 
     // Basic validation
-    if (!name || !email || !message) {
+    if (!name || !email || !phone || !city || !state || !message) {
       return {
         statusCode: 400,
         body: "Missing required fields",
@@ -77,7 +77,9 @@ export async function handler(event) {
         <h2>New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${escapeHtml(name)}</p>
         <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(phone || "N/A")}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+        <p><strong>City:</strong> ${escapeHtml(city)}</p>
+        <p><strong>State:</strong> ${escapeHtml(state)}</p>
         <p><strong>Message:</strong></p>
         <p>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
       `,
