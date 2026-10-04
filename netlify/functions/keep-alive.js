@@ -6,7 +6,7 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-// Runs on Netlify's daily schedule (see netlify.toml) purely to keep the
+// Runs every morning on Netlify's schedule (see netlify.toml) to keep the
 // free-tier Supabase project from being auto-paused after a week idle.
 export async function handler() {
   const { error } = await supabase
