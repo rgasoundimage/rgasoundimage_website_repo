@@ -16,7 +16,8 @@
   node_bundler = "esbuild"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # 22+: @supabase/supabase-js needs native WebSocket. Functions run on this version too.
+  NODE_VERSION = "22"
 
 # Icons. NOT `immutable`: these filenames are stable (icon-192.png keeps its
 # name across releases), and `immutable` tells the browser never to revalidate,
