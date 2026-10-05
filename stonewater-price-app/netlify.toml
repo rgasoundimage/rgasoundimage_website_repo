@@ -7,9 +7,13 @@
   # Publish the static app folder.
   publish = "site"
   # The only build step: stamp a fresh service-worker cache version
-  # (from the commit SHA) so redeploys are never stale. No Python needed here —
-  # prices.json is generated locally and committed.
+  # (from the commit SHA) so redeploys are never stale. Prices are not built
+  # here — they are read from Supabase at request time (netlify/functions).
   command = "node scripts/stamp-cache.mjs"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -30,7 +34,9 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-[[headers]]
-  for = "/prices.json"
-  [headers.values]
-    Cache-Control = "no-cache"
+# /api/prices        -> catalogue JSON from Supabase (read by app.js)
+# /api/admin-prices  -> admin-screen reads/writes (passcode-checked server-side)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

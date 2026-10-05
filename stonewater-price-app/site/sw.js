@@ -2,7 +2,9 @@
    v2 — network-first so redeploys show up on reload, cache fallback for offline */
 const CACHE = "stonewater-dev";
 const ASSETS = [
-  "./", "index.html", "styles.css", "app.js", "expr.js", "prices.json",
+  // api/prices is NOT precached: install would fail whenever the function did.
+  // The fetch handler below caches it on the first successful load instead.
+  "./", "index.html", "styles.css", "app.js", "expr.js",
   "manifest.webmanifest",
   "icons/rga-logo.png",
   // ?v= is deliberate. netlify.toml serves /icons/* with `immutable`, so a client
@@ -25,11 +27,14 @@ self.addEventListener("activate", (e) => {
 });
 
 // Network-first: try the live file, fall back to cache when offline.
+// An error response (e.g. the prices function failing) never overwrites a good
+// cached copy; the cached copy is served instead when there is one.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {
+        if (!res.ok) return caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || res);
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         return res;

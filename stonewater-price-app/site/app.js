@@ -947,8 +947,19 @@ $("picker").addEventListener("click", (e) => { if (e.target.id === "picker") clo
 
 /* ---------- boot ---------- */
 async function boot() {
-  const res = await fetch("prices.json", { cache: "no-cache" });
-  DATA = await res.json();
+  // Prices come from Supabase via netlify/functions/prices.mjs. Offline, the
+  // service worker answers with the last copy it saw.
+  try {
+    const res = await fetch("api/prices", { cache: "no-cache" });
+    // Offline with nothing cached, the service worker answers with index.html.
+    const body = await res.json().catch(() => ({ error: "you appear to be offline" }));
+    if (!res.ok || !body.brands) throw new Error(body.error || `HTTP ${res.status}`);
+    DATA = body;
+  } catch (err) {
+    $("results").innerHTML = `<div class="empty">Couldn't load prices: ${esc(err.message)}<br>Check your connection and reload.</div>`;
+    $("countLine").textContent = "No data";
+    return;
+  }
 
   const savedBrand = localStorage.getItem(LS.brand);
   brandId = savedBrand && DATA.brands.some((b) => b.id === savedBrand) ? savedBrand : DATA.brands[0].id;

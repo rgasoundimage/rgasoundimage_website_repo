@@ -1,16 +1,19 @@
 {
   "name": "stonewater-price-app",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "private": true,
   "description": "Installable PWA price catalogue and quote builder for RGA Sound Image brands (Stonewater, Kasper).",
   "scripts": {
-    "data": "python3 build_prices.py",
     "stamp": "node scripts/stamp-cache.mjs",
     "build": "node scripts/stamp-cache.mjs",
     "dev": "npx --yes serve site -l 5000",
     "test": "node tests/run-all.mjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "jsdom": "^29.1.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2"
   }
 }

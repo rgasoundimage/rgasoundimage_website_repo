@@ -1,0 +1,144 @@
+/* Shared by the prices + admin-prices functions.
+ *
+ * The price DATA lives in Supabase (supabase/001_price_tables.sql). This file
+ * holds the app CONFIG that used to live in build_prices.py: which brands and
+ * price lists exist, their labels, and which prices each role may see. */
+import { createClient } from "@supabase/supabase-js";
+
+export function supabaseAdmin() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not set on this site");
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+// Supabase caps a single select (1000 rows by default); page through to be
+// safe. `order` must give a stable total order or pages can overlap.
+export async function selectAll(supabase, table, order, page = 1000) {
+  const out = [];
+  for (let from = 0; ; from += page) {
+    let q = supabase.from(table).select("*");
+    for (const col of order) q = q.order(col);
+    const { data, error } = await q.range(from, from + page - 1);
+    if (error) throw new Error(error.message);
+    out.push(...data);
+    if (data.length < page) return out;
+  }
+}
+
+export const json = (statusCode, body) => ({
+  statusCode,
+  headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
+  body: JSON.stringify(body),
+});
+
+/* `inputs` are the typed-in columns of product_prices for this list, in the
+   order the admin screen shows them. The first one is required. */
+export const LISTS = {
+  praveen: {
+    appId: "praveen", label: "Price List", internalOnly: false,
+    inputs: [
+      { column: "list_price", label: "List price (pre-tax)" },
+      { column: "dist_incl_tax", label: "Distributor price (tax incl.)" },
+    ],
+    labels: {
+      listPrice: "List Price +18%", dealer: "Dealer", subdealer: "Sub-dealer",
+      distInclTax: "Distributor (tax incl.)", msrp: "MSRP", msrp35: "MSRP −35%",
+      msrp30: "MSRP −30%", msrp20: "MSRP −20%", msrp15: "MSRP −15%",
+      dealerMargin: "Dealer margin", msrpMargin: "MSRP margin",
+    },
+    roles: {
+      customer: ["msrp"], dealer: ["dealer", "msrp"], subdealer: ["subdealer", "msrp"],
+      internal: ["msrp", "msrp35", "msrp30", "msrp20", "msrp15", "dealer", "subdealer",
+                 "listPrice", "distInclTax", "dealerMargin", "msrpMargin"],
+    },
+    percentKeys: ["dealerMargin", "msrpMargin"],
+  },
+  distdealer: {
+    appId: "distdealer", label: "Dist / Dealer", internalOnly: true,
+    inputs: [
+      { column: "list_price", label: "List price (pre-tax)" },
+      { column: "dist_cost", label: "Distributor price (pre-tax)" },
+    ],
+    labels: {
+      distCost: "Distributor cost", listPrice: "List Price +18%", dealer: "Dealer",
+      subdealer: "Sub-dealer", distInclTax: "Distributor (tax incl.)", msrp: "MSRP",
+      msrp30: "MSRP −30%", msrp20: "MSRP −20%", dealerDistMargin: "Dealer-dist margin",
+      subdealerDistMargin: "Sub-dealer-dist margin",
+    },
+    roles: {
+      customer: ["msrp"], dealer: ["dealer", "msrp"], subdealer: ["subdealer", "msrp"],
+      internal: ["msrp", "msrp30", "msrp20", "dealer", "subdealer", "listPrice", "distCost",
+                 "distInclTax", "dealerDistMargin", "subdealerDistMargin"],
+    },
+    percentKeys: ["dealerDistMargin", "subdealerDistMargin"],
+  },
+  kasper: {
+    // "products" is the id the app has always used; kept so saved selections survive.
+    appId: "products", label: "Price List", internalOnly: false,
+    inputs: [{ column: "mrp", label: "MRP (tax incl.)" }],
+    labels: {
+      distRga: "Dist RGA cost", distInclTax: "Distributor (tax incl.)", dealer: "Dealer",
+      listPlusTax: "List price +Tax", mrp: "MRP", dealerMargin: "Dealer margin",
+      distMargin: "Dist margin",
+    },
+    roles: {
+      customer: ["mrp"], dealer: ["dealer", "mrp"], subdealer: ["mrp"],
+      internal: ["mrp", "dealer", "listPlusTax", "distRga", "distInclTax", "dealerMargin", "distMargin"],
+    },
+    percentKeys: ["dealerMargin", "distMargin"],
+  },
+};
+
+// id: what app.js and saved selections use. slug: the brands.slug row in Supabase.
+export const BRANDS = [
+  { id: "stonewater", slug: "stonewater-audio", name: "Stonewater", effectiveDate: "01 Apr 2026", lists: ["praveen", "distdealer"] },
+  { id: "kasper", slug: "kasper", name: "Kasper", effectiveDate: "2026", lists: ["kasper"] },
+];
+
+/* Rows from the price_catalog view -> the prices.json shape app.js reads:
+   { brands: [{ id, name, effectiveDate, lists: [{ id, label, internalOnly,
+     labels, roles, percentKeys, categories: [{ name, subcategories: [{ name,
+     products: [{ model, description, prices }] }] }] }] }] } */
+export function buildCatalog(rows) {
+  const sorted = [...rows].sort((a, b) => a.sort_order - b.sort_order || a.model.localeCompare(b.model));
+  return {
+    brands: BRANDS.map((b) => ({
+      id: b.id, name: b.name, effectiveDate: b.effectiveDate,
+      lists: b.lists.map((listId) => {
+        const L = LISTS[listId];
+        // Map preserves first-seen order, so categories follow sort_order.
+        const cats = new Map();
+        for (const r of sorted) {
+          if (r.brand !== b.slug || r.list_id !== listId) continue;
+          if (!cats.has(r.category)) cats.set(r.category, new Map());
+          const subs = cats.get(r.category);
+          if (!subs.has(r.subcategory)) subs.set(r.subcategory, []);
+          subs.get(r.subcategory).push({
+            model: r.model, description: r.description || "",
+            prices: cleanPrices(r.prices, Object.keys(L.labels)),
+          });
+        }
+        return {
+          id: L.appId, label: L.label, internalOnly: L.internalOnly,
+          labels: L.labels, roles: L.roles, percentKeys: L.percentKeys,
+          categories: [...cats].map(([name, subs]) => ({
+            name, subcategories: [...subs].map(([name, products]) => ({ name, products })),
+          })),
+        };
+      }),
+    })),
+  };
+}
+
+// jsonb sorts its keys, so emit them in the list's label order instead. Zeros
+// were always omitted from the catalogue; keep doing that.
+function cleanPrices(prices, order) {
+  const out = {};
+  for (const k of order) {
+    if (!prices || !(k in prices)) continue;
+    const n = Number(prices[k]);
+    if (Number.isFinite(n) && n !== 0) out[k] = n;
+  }
+  return out;
+}

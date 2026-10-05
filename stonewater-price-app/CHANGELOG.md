@@ -6,6 +6,35 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.6.0] - Prices move from Excel to Supabase - 2026-10-05 · cache `stonewater-<commitSHA>`
+Minor. Same catalogue and quote builder; the data now comes from Supabase and can be edited
+in the app.
+
+### Added
+- **Supabase as the source of truth.** Products live in the shared `products` table (the one
+  the barcode/SKU tables use); the typed-in Excel prices live in `product_prices`; every other
+  price is calculated by the `price_catalog` view with the Excel formulas, cell for cell.
+  `supabase/001_price_tables.sql` and `002_seed.sql` (both re-runnable). A test rehearses both
+  against a copy of the live catalogue and checks every price against the last Excel build.
+- **Admin screen** (`admin.html`, linked from Settings). Edit products and the typed-in prices,
+  add and delete products, set status and product type. Writes go through
+  `/api/admin-prices`, which checks `ADMIN_PASSCODE` on the server.
+- **`/api/prices`** Netlify function replaces the static `prices.json`.
+
+### Changed
+- CS-4LM is discontinued, so it no longer appears. The Dist / Dealer list now shows the same
+  fuller descriptions as the public Price List. Media Player MP-01 now shows its two margins,
+  which were missing from its Excel row.
+- The service worker no longer precaches price data, and never replaces a good cached copy
+  with an error response.
+- `generate_upc()` falls back to the parent category's barcode prefix.
+
+### Removed
+- `build_prices.py`, the `data/` Excel files and `npm run data`. The old `prices.json` is kept
+  as `tests/fixtures/prices.json`, the reference the SQL formulas are tested against.
+
+---
+
 ## [2.5.1] - Quote module UI fixes - 2026-08-18 · cache `stonewater-<commitSHA>`
 Patch. Presentation only. Three CSS fixes in the Quote Builder; no JavaScript, HTML, data-model,
 or `prices.json` changes. Specified in `docs/PRD-v2.5.1-quote-ui-fixes.md`; tracked as BUG-002/003/004.

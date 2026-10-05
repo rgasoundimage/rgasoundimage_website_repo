@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>RGA Prices · Admin</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="icons/favicon-32.png?v=2.3.0" sizes="32x32" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-body">
+  <header class="topbar">
+    <div class="brand">
+      <a class="backlink" href="./">‹ Catalogue</a>
+      <span class="brand-sub">Edit prices</span>
+    </div>
+    <img class="brand-logo" src="icons/rga-logo.png" width="20" height="38" alt="RGA Sound Image" />
+    <div class="top-right">
+      <button id="lockAdmin" class="mini" hidden>Lock</button>
+    </div>
+  </header>
+
+  <!-- Passcode gate. The passcode is checked by the server, not here. -->
+  <section id="login" class="admin-login">
+    <h1>Edit prices</h1>
+    <p class="modal-sub">Enter the admin passcode to change products and prices.</p>
+    <form id="loginForm">
+      <div class="passrow">
+        <input id="adminPass" type="password" placeholder="Admin passcode" autocomplete="current-password" autocapitalize="off" spellcheck="false" />
+        <button id="adminPassToggle" type="button" class="reveal">Show</button>
+      </div>
+      <p id="loginErr" class="passerr" hidden></p>
+      <div class="modal-actions">
+        <button id="loginBtn" type="submit" class="btn">Unlock</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="editor" hidden>
+    <div class="controls">
+      <label class="field">
+        <span>Brand</span>
+        <select id="adminBrand"></select>
+      </label>
+      <button id="addProduct" class="lockbtn">+ Add product</button>
+    </div>
+    <div class="searchwrap">
+      <input id="adminSearch" class="admin-search" type="search" inputmode="search" placeholder="Search model or description…" autocomplete="off" />
+    </div>
+    <main id="adminList" class="results"></main>
+    <div id="adminEmpty" class="empty" hidden>No products match.</div>
+  </section>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <!-- Add / edit product -->
+  <div id="editModal" class="modal" hidden>
+    <div class="sheet sheet-scroll">
+      <h2 id="editTitle">Edit product</h2>
+      <p id="editSub" class="modal-sub"></p>
+      <form id="editForm" novalidate>
+        <div class="set-section">
+          <div class="set-head">Product</div>
+          <label class="afield"><span>Model number *</span><input name="model" required autocomplete="off" /></label>
+          <label class="afield"><span>Description</span><textarea name="description" rows="2"></textarea></label>
+          <label class="afield"><span>Product type *</span>
+            <select name="type_id" required><option value="">Choose a type…</option></select></label>
+          <p class="hint">The product type sets the barcode prefix.</p>
+          <label class="afield"><span>Status</span>
+            <select name="status">
+              <option value="active">Active — shown in the app</option>
+              <option value="discontinued">Discontinued — hidden</option>
+              <option value="draft">Draft — hidden</option>
+              <option value="archived">Archived — hidden</option>
+            </select></label>
+        </div>
+
+        <div class="set-section">
+          <div class="set-head">Where it appears in the app</div>
+          <div class="arow">
+            <label class="afield"><span>Heading</span><input name="category" list="catList" autocomplete="off" placeholder="none" /></label>
+            <label class="afield"><span>Group *</span><input name="subcategory" list="subList" autocomplete="off" /></label>
+          </div>
+          <label class="afield"><span>Sort order</span><input name="sort_order" inputmode="numeric" autocomplete="off" placeholder="auto: end of group" /></label>
+          <datalist id="catList"></datalist>
+          <datalist id="subList"></datalist>
+        </div>
+
+        <!-- One block per price list of the brand, filled by admin.js -->
+        <div id="priceInputs"></div>
+
+        <p id="editErr" class="passerr" hidden></p>
+        <div class="modal-actions">
+          <button id="deleteProduct" type="button" class="btn ghost danger" hidden>Delete</button>
+          <button id="cancelEdit" type="button" class="btn ghost">Cancel</button>
+          <button id="saveProduct" type="submit" class="btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

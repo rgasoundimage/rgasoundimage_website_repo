@@ -12,6 +12,5 @@ __pycache__/
 .venv/
 venv/
 
-# NOTE: prices.json is intentionally committed — it is the data the app serves.
-# NOTE: the source .xlsx files in data/ are intentionally committed too, so the
-#       catalogue is reproducible by anyone who clones the repo.
+# Local env for `netlify dev` (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSCODE)
+.env

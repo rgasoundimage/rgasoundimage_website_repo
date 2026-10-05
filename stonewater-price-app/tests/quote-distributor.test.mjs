@@ -1,5 +1,5 @@
 /* v2.4.0 — Distributor baseline. Run: node tests/quote-distributor.test.mjs
-   Exercises the real app.js against the real prices.json in a jsdom DOM. */
+   Exercises the real app.js against the prices.json snapshot (tests/fixtures) in a jsdom DOM. */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,7 +7,7 @@ import { JSDOM } from "jsdom";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = path.join(ROOT, "site");
-const PRICES = JSON.parse(fs.readFileSync(path.join(SITE, "prices.json"), "utf8"));
+const PRICES = JSON.parse(fs.readFileSync(path.join(ROOT, "tests", "fixtures", "prices.json"), "utf8"));
 
 let pass = 0, fail = 0;
 const ok = (cond, msg) => { cond ? (pass++, console.log("  ok   " + msg))

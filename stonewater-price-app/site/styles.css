@@ -511,3 +511,7 @@ button,input,select{font-family:inherit}
    .qprice is type="text" from 2.5.0, so those rules simply stop applying.
    Nothing to remove - but keep tabular numerals aligned with the row. */
 .qprice{font-variant-numeric:tabular-nums}
+
+/* v2.6.0 — link to the admin screen (Settings sheet) */
+.adminlink{color:var(--text);text-decoration:none;justify-content:space-between}
+.adminlink span:last-child{flex:0;color:var(--muted)}
