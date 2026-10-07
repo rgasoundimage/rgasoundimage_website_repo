@@ -30,8 +30,8 @@ Typed-in prices per list:
 
 | List | Brand | You enter | Calculated |
 |---|---|---|---|
-| Price List (`praveen`) | Stonewater | List price (pre-tax), Distributor price (tax incl.) | Dealer, Sub-dealer, MSRP and its discounts, margins |
-| Dist / Dealer (`distdealer`, internal) | Stonewater | List price (pre-tax), Distributor price (pre-tax) | Dealer, Sub-dealer, Distributor tax incl., MSRP, margins |
+| Price List (`praveen`) | Stonewater | MSRP, Distributor price (tax incl.) | List price (MSRP ÷ 1.18, rounded up to ₹10, recalculated only when MSRP changes), Dealer, Sub-dealer, MSRP discounts, margins |
+| Dist / Dealer (`distdealer`, internal) | Stonewater | MSRP, Distributor price (pre-tax) | List price (as above), Dealer, Sub-dealer, Distributor tax incl., MSRP discounts, margins |
 | Price List (`kasper`) | Kasper | MRP (tax incl.) | Dist RGA, Dealer, List + Tax, margins |
 
 ## Editing prices
@@ -53,8 +53,10 @@ roles and which lists exist are configured in `netlify/lib/catalog.mjs`.
 ## Database scripts
 
 `supabase/001_price_tables.sql` creates the tables, views and functions;
-`supabase/002_seed.sql` imported the Excel data (2026-10-05). Both are safe to
-re-run. Change the schema with a new numbered file.
+`supabase/002_seed.sql` imported the Excel data (2026-10-05);
+`supabase/003_editable_msrp.sql` makes MSRP the typed Stonewater price. All are
+safe to re-run, except that re-running 002 after 003 resets typed MSRPs to the
+Excel-derived ones. Change the schema with a new numbered file.
 
 ## Development
 

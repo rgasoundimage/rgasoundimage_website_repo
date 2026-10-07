@@ -60,7 +60,7 @@ async function listAll(supabase) {
     lastChange: stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : null,
     brands: BRANDS.map((b) => ({ id: b.id, name: b.name, lists: b.lists })),
     lists: Object.fromEntries(Object.entries(LISTS).map(([id, L]) => [id, {
-      label: L.label, inputs: L.inputs, labels: L.labels, percentKeys: L.percentKeys,
+      label: L.label, inputs: L.inputs, note: L.note || "", labels: L.labels, percentKeys: L.percentKeys,
     }])),
     statuses: STATUSES,
     types: productTypes(categories, prefixes),

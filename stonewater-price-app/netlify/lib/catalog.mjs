@@ -42,14 +42,17 @@ export function passcodeMatches(given, expected) {
 }
 
 /* `inputs` are the typed-in columns of product_prices for this list, in the
-   order the admin screen shows them. The first one is required. */
+   order the admin screen shows them. The first one is required. `note` is
+   shown under them on the admin screen. */
+const LIST_FROM_MSRP = "List price is calculated from MSRP: MSRP ÷ 1.18, rounded up to the next ₹10. It is only recalculated when you change the MSRP.";
 export const LISTS = {
   praveen: {
     appId: "praveen", label: "Price List", internalOnly: false,
     inputs: [
-      { column: "list_price", label: "List price (pre-tax)" },
+      { column: "msrp", label: "MSRP (tax incl.)" },
       { column: "dist_incl_tax", label: "Distributor price (tax incl.)" },
     ],
+    note: LIST_FROM_MSRP,
     labels: {
       listPrice: "List Price +18%", dealer: "Dealer", subdealer: "Sub-dealer",
       distInclTax: "Distributor (tax incl.)", msrp: "MSRP", msrp35: "MSRP −35%",
@@ -66,9 +69,10 @@ export const LISTS = {
   distdealer: {
     appId: "distdealer", label: "Dist / Dealer", internalOnly: true,
     inputs: [
-      { column: "list_price", label: "List price (pre-tax)" },
+      { column: "msrp", label: "MSRP (tax incl.)" },
       { column: "dist_cost", label: "Distributor price (pre-tax)" },
     ],
+    note: LIST_FROM_MSRP,
     labels: {
       distCost: "Distributor cost", listPrice: "List Price +18%", dealer: "Dealer",
       subdealer: "Sub-dealer", distInclTax: "Distributor (tax incl.)", msrp: "MSRP",

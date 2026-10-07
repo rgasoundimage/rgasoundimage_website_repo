@@ -28,6 +28,8 @@ const before = Object.fromEntries((await q(`select model_number, id, category_id
 await db.exec(read("supabase", "001_price_tables.sql"));
 await db.exec(read("supabase", "001_price_tables.sql"));   // must be re-runnable
 await db.exec(read("supabase", "002_seed.sql"));
+await db.exec(read("supabase", "003_editable_msrp.sql"));
+await db.exec(read("supabase", "003_editable_msrp.sql"));   // must be re-runnable
 
 const save = async (p) => (await q("select public.price_save_product($1::jsonb) as id", [JSON.stringify(p)]))[0].id;
 const product = async (model) => (await q(`select p.*, c.slug as type_slug, g.heading, g.name as group_name
@@ -149,7 +151,7 @@ ok(/No barcode prefix/.test(avalonErr), "Avalon X520 (Cinema Amplifier) has no p
 
 /* ---------- D: editing one input re-derives everything ---------- */
 console.log("\nD. Changing a typed-in price updates the derived ones");
-await db.exec(`update public.product_prices set list_price = 3000
+await db.exec(`update public.product_prices set list_price = 3000, msrp = null
   where list_id = 'praveen' and product_id = (select id from public.products where model_number = 'CS-6LE')`);
 const cs = (await q(`select prices from public.price_catalog where model = 'CS-6LE' and list_id = 'praveen'`))[0].prices;
 ok(Number(cs.dealer) === 2100, "dealer = list × 0.7 → 2100");
@@ -201,6 +203,32 @@ const left = (await q(`select count(*)::int as n from public.product_prices pr
 ok(left === 0, "deleting a product deletes its prices");
 await rejects(() => db.exec(`delete from public.products where model_number = 'QUBE 3'`),
   "a product with SKUs cannot be deleted");
+
+/* ---------- H: MSRP is the typed Stonewater price (003) ---------- */
+console.log("\nH. Editable MSRP; List price = MSRP ÷ 1.18 rounded up to ₹10");
+await db.exec(read("supabase", "003_editable_msrp.sql"));   // re-freeze MSRPs after the 002 re-run above
+const lp = async (model, list) => (await q(`select pr.list_price, pr.msrp from public.product_prices pr
+  join public.products p on p.id = pr.product_id where p.model_number = $1 and pr.list_id = $2`, [model, list]))[0];
+const cat = async (model, list) => (await q(`select prices from public.price_catalog where model = $1 and list_id = $2`, [model, list]))[0].prices;
+const frozen = await lp("CS-6LM", "praveen");
+ok(Number(frozen.msrp) === 5460 && Number(frozen.list_price) === 4629, "003 stores today's MSRP (CS-6LM 5,460) and keeps List 4,629");
+const pf = (await product("CS-6LM"));
+const pfSave = (prices) => save({ id: pf.id, brand: "stonewater-audio", model: "CS-6LM", category: "Commercial",
+  subcategory: "In Ceiling Speakers", prices });
+await pfSave({ praveen: { msrp: 5460, dist_incl_tax: 2700 }, distdealer: { msrp: 4750, dist_cost: 2214 } });
+ok(Number((await lp("CS-6LM", "praveen")).list_price) === 4629, "saving with the MSRP unchanged keeps List price (4,629)");
+await pfSave({ praveen: { msrp: 5000, dist_incl_tax: 2700 }, distdealer: { msrp: 4750, dist_cost: 2214 } });
+const c6 = await cat("CS-6LM", "praveen");
+ok(Number((await lp("CS-6LM", "praveen")).list_price) === 4240, "MSRP 5,000 → List 5,000 ÷ 1.18 = 4,237.3 → rounded up to 4,240");
+ok(Number(c6.msrp) === 5000 && Number(c6.dealer) === 2968 && Number(c6.msrp30) === 3500,
+   "catalogue: MSRP 5,000, Dealer 4,240 × 0.7 = 2,968, MSRP −30% 3,500");
+ok(Number((await lp("CS-6LM", "distdealer")).list_price) === 4025, "the other list (MSRP unchanged) keeps its List price");
+await pfSave({ praveen: { msrp: 2360, dist_incl_tax: 2700 }, distdealer: { msrp: 4750, dist_cost: 2214 } });
+ok(Number((await lp("CS-6LM", "praveen")).list_price) === 2000, "an exact multiple stays put: MSRP 2,360 → List 2,000");
+const newSw = await save({ brand: "stonewater-audio", model: "TEST-MSRP", category: "Commercial", subcategory: "Streamer",
+  type_id: await typeId("media-player"), prices: { praveen: { msrp: 1442 * 1.18 } } });
+ok(Number((await q(`select list_price from public.product_prices where product_id = $1`, [newSw]))[0].list_price) === 1450,
+   "a new product: list 1,442 → rounded up to 1,450 (the agreed example)");
 
 /* ---------- G: public file vs full catalogue (v2.6.1) ---------- */
 console.log("\nG. Public prices.json carries customer prices only");

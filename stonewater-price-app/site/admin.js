@@ -209,6 +209,7 @@ function openEdit(p) {
           <input class="money" data-list="${esc(listId)}" data-col="${esc(i.column)}"
                  inputmode="decimal" autocomplete="off" placeholder="—"
                  value="${vals[i.column] ?? ""}" /></label>`).join("")}
+      ${L.note ? `<p class="hint">${esc(L.note)}</p>` : ""}
       ${p && p.computed[listId] ? calcGrid(L, p.computed[listId])
         : p && p.status !== "active" && vals[L.inputs[0].column] ? `<p class="hint">Not shown in the app while ${esc(p.status)}.</p>` : ""}
     </div>`;

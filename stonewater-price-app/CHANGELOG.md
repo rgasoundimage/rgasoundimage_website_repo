@@ -6,6 +6,19 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.6.2] - Stonewater MSRP is the price you type - 2026-10-07 · cache `stonewater-<commitSHA>`
+Patch. Admin screen and database only; the app is unchanged.
+
+### Changed
+- On both Stonewater lists, the admin screen now takes **MSRP** instead of List price. When a
+  product's MSRP is saved with a new value, its List price is recalculated as MSRP ÷ 1.18,
+  rounded **up** to the next ₹10 (4,600 → 3,898.3 → 3,900). Dealer, Sub-dealer and the rest
+  follow from List price as before; the MSRP discounts and margins follow the MSRP.
+- Existing prices are unchanged. `supabase/003_editable_msrp.sql` stores each product's current
+  MSRP as-is, and keeps its List price until that product's MSRP is edited.
+
+---
+
 ## [2.6.1] - Static prices again, server-side passcode, instant start - 2026-10-07 · cache `stonewater-<commitSHA>`
 Patch. Fixes the slow and intermittently failing loads seen after 2.6.0, and closes the public
 exposure of dealer and distributor prices.
