@@ -6,9 +6,18 @@ rgapricelist.netlify.app (Netlify site `rgapricelist`, base directory
 
 ## Where the prices live
 
-Since v2.6.0 prices are in **Supabase**, not Excel. The app loads them from
-`/api/prices` on every visit; the service worker keeps the last good copy for
-offline use.
+Prices are edited in **Supabase**, but the app never reads Supabase while
+someone is viewing it. Each Netlify build (`scripts/build-catalog.mjs`) reads
+Supabase once and writes:
+
+- `site/prices.json`: public, **customer prices only** (MSRP / MRP), served from the CDN.
+- `netlify/generated/catalog-full.mjs`: every price, bundled into the
+  `prices-full` function. It's returned only to someone who enters the dealer
+  passcode (`PRICE_PASSCODE`, checked on the server).
+
+If Supabase can't be read, the build fails and the previous deploy stays live.
+The app also keeps its last copy on each phone and refreshes it in the
+background, so a slow or dropped connection doesn't blank the screen.
 
 | Table / view | What it holds |
 |---|---|
@@ -28,14 +37,18 @@ Typed-in prices per list:
 ## Editing prices
 
 Open **Settings → Edit products & prices** in the app (or `/admin.html`) and
-enter the admin passcode. Changes show in the app on the next reload. Labels,
+enter the admin passcode. Save your edits, then press **Publish**. That rebuilds
+the site, and the app shows the changes about 1–2 minutes later. The screen tells
+you when there are unpublished changes. Labels,
 roles and which lists exist are configured in `netlify/lib/catalog.mjs`.
 
 ## Netlify environment variables (site `rgapricelist`)
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY` (secret)
-- `ADMIN_PASSCODE` (secret; the admin screen's passcode, checked server-side)
+- `SUPABASE_SERVICE_ROLE_KEY` (secret; used by the build and the admin screen)
+- `ADMIN_PASSCODE` (secret; the admin screen's passcode)
+- `PRICE_PASSCODE` (secret; unlocks dealer / sub-dealer / internal views and the Quote Builder)
+- `BUILD_HOOK_URL` (the site's "Price admin: Publish" build hook)
 
 ## Database scripts
 
@@ -47,4 +60,5 @@ re-run. Change the schema with a new numbered file.
 
     npm install
     npm test        # includes a rehearsal of the SQL against a copy of the live catalogue
-    npm run dev     # static preview only; /api needs `netlify dev` with the env vars above
+    npm run build   # needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY; writes site/prices.json
+    npm run dev     # static preview of site/ (run the build first); /api needs `netlify dev`

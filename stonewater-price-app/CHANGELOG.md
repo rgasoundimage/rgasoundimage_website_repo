@@ -6,6 +6,36 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.6.1] - Static prices again, server-side passcode, instant start - 2026-10-07 · cache `stonewater-<commitSHA>`
+Patch. Fixes the slow and intermittently failing loads seen after 2.6.0, and closes the public
+exposure of dealer and distributor prices.
+
+### Fixed
+- **Viewing never depends on Supabase.** 2.6.0 fetched prices live: phone → Netlify function in
+  the US (us-east-2) → Supabase in Mumbai → back. That took 1.5–4 s per load, longer when idle,
+  with the free plan's 10 s function limit as a failure point. Prices are now built into static
+  files at deploy time (`scripts/build-catalog.mjs`) and served from the CDN, as in the Excel days.
+- **Instant start, even offline or on a weak signal.** The app shows its last saved copy straight
+  away and refreshes in the background with a 4 s limit. A failed refresh keeps the saved copy. A
+  first visit with no connection shows a "Try again" button instead of a blank screen.
+
+### Security
+- **The public file has customer prices only.** `prices.json` used to contain every price,
+  including dealer, distributor cost and margins, behind a passcode checked only in the browser.
+  It now carries MSRP / MRP only. The full catalogue is bundled into the `prices-full` function
+  and returned only after the server accepts `PRICE_PASSCODE`. The old passcode is no longer in
+  `app.js`. Locking forgets the passcode and the full prices on that device.
+
+### Added
+- **Publish** on the admin screen. Saved edits reach the app after a rebuild (about 1–2 minutes).
+  The screen shows when there are unpublished changes and confirms when they're live. The footer
+  shows when the prices were last updated.
+
+### Removed
+- `/api/prices` (the live Supabase read).
+
+---
+
 ## [2.6.0] - Prices move from Excel to Supabase - 2026-10-05 · cache `stonewater-<commitSHA>`
 Minor. Same catalogue and quote builder; the data now comes from Supabase and can be edited
 in the app.

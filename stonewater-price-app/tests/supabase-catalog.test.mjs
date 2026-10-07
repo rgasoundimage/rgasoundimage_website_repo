@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PGlite } from "@electric-sql/pglite";
-import { buildCatalog } from "../netlify/lib/catalog.mjs";
+import { buildCatalog, publicCatalog } from "../netlify/lib/catalog.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (...p) => fs.readFileSync(path.join(ROOT, ...p), "utf8");
@@ -201,6 +201,23 @@ const left = (await q(`select count(*)::int as n from public.product_prices pr
 ok(left === 0, "deleting a product deletes its prices");
 await rejects(() => db.exec(`delete from public.products where model_number = 'QUBE 3'`),
   "a product with SKUs cannot be deleted");
+
+/* ---------- G: public file vs full catalogue (v2.6.1) ---------- */
+console.log("\nG. Public prices.json carries customer prices only");
+const fullCat = { generatedAt: "2026-10-07T00:00:00.000Z", ...built };
+const pub = publicCatalog(fullCat);
+const pubLists = pub.brands.flatMap((b) => b.lists);
+ok(!pubLists.some((L) => L.internalOnly) && !pubLists.some((L) => L.id === "distdealer"), "internal-only Dist / Dealer list is not public");
+const pubKeys = new Set(pubLists.flatMap((L) => L.categories.flatMap((c) => c.subcategories.flatMap((s) => s.products.flatMap((p) => Object.keys(p.prices))))));
+ok(canon([...pubKeys].sort()) === canon(["mrp", "msrp"]), `only MSRP / MRP are public (got ${[...pubKeys].join(", ")})`);
+const pubJson = JSON.stringify(pub);
+ok(!/dealer"|distInclTax|distRga|distCost|Margin"|listPrice"|listPlusTax/.test(pubJson.replace(/"labels":\{[^}]*\}|"roles":\{[^}]*\}|"percentKeys":\[[^\]]*\]/g, "")),
+   "no dealer, distributor, list or margin figures anywhere in the public file");
+ok(count(pubLists.find((L) => L.id === "praveen")) === 66 && count(pubLists.find((L) => L.id === "products")) === 57,
+   "public file still has every active product (66 Stonewater, 57 Kasper)");
+ok(pub.generatedAt === fullCat.generatedAt, "public file carries the build time (shown in the app footer)");
+const appJs = read("site", "app.js");
+ok(!/PASSCODE\s*=|"stonewater"/.test(appJs), "app.js no longer contains the passcode");
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

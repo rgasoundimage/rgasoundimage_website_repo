@@ -62,6 +62,7 @@ const SHELL = `<!doctype html><html><body>
 const dom = new JSDOM(SHELL, { url: 'https://example.test/', pretendToBeVisual: true, runScripts: 'outside-only' });
 const { window } = dom;
 window.localStorage.setItem('sw_unlocked', '1');          // Quote tab is gated
+window.localStorage.setItem('sw_pass', 'test');             // unlocked needs a stored passcode (v2.6.1)
 window.fetch = async () => ({ ok: true, json: async () => PRICES });
 
 const ctx = window;

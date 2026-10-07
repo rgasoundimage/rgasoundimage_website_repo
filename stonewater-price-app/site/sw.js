@@ -2,8 +2,8 @@
    v2 — network-first so redeploys show up on reload, cache fallback for offline */
 const CACHE = "stonewater-dev";
 const ASSETS = [
-  // api/prices is NOT precached: install would fail whenever the function did.
-  // The fetch handler below caches it on the first successful load instead.
+  // Price data is not precached here: app.js keeps its own last-good copy in
+  // localStorage (and the fetch handler below caches prices.json too).
   "./", "index.html", "styles.css", "app.js", "expr.js",
   "manifest.webmanifest",
   "icons/rga-logo.png",

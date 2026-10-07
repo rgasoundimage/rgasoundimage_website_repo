@@ -1,8 +1,9 @@
-/* Shared by the prices + admin-prices functions.
+/* Shared by the build script and the Netlify functions.
  *
  * The price DATA lives in Supabase (supabase/001_price_tables.sql). This file
- * holds the app CONFIG that used to live in build_prices.py: which brands and
- * price lists exist, their labels, and which prices each role may see. */
+ * holds the app CONFIG: which brands and price lists exist, their labels, and
+ * which prices each role may see. */
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 export function supabaseAdmin() {
@@ -26,11 +27,19 @@ export async function selectAll(supabase, table, order, page = 1000) {
   }
 }
 
-export const json = (statusCode, body) => ({
+export const json = (statusCode, body, cache = "no-cache") => ({
   statusCode,
-  headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
+  headers: { "Content-Type": "application/json", "Cache-Control": cache },
   body: JSON.stringify(body),
 });
+
+// Constant-time passcode check. Hashing both sides makes the comparison
+// independent of length.
+export function passcodeMatches(given, expected) {
+  const a = createHash("sha256").update(String(given)).digest();
+  const b = createHash("sha256").update(String(expected)).digest();
+  return timingSafeEqual(a, b);
+}
 
 /* `inputs` are the typed-in columns of product_prices for this list, in the
    order the admin screen shows them. The first one is required. */
@@ -141,4 +150,34 @@ function cleanPrices(prices, order) {
     if (Number.isFinite(n) && n !== 0) out[k] = n;
   }
   return out;
+}
+
+/* The catalogue anyone can download (site/prices.json): customer prices only.
+   Internal-only lists (Dist / Dealer) are dropped, and each product keeps just
+   the keys of its list's `customer` role (MSRP / MRP). Dealer, distributor and
+   margin figures only ever leave the server through the passcode-checked
+   prices-full function. */
+export function publicCatalog(full) {
+  return {
+    generatedAt: full.generatedAt,
+    brands: full.brands.map((b) => ({
+      ...b,
+      lists: b.lists.filter((L) => !L.internalOnly).map((L) => {
+        const keep = new Set(L.roles.customer || []);
+        return {
+          ...L,
+          categories: L.categories.map((c) => ({
+            ...c,
+            subcategories: c.subcategories.map((s) => ({
+              ...s,
+              products: s.products.map((p) => ({
+                ...p,
+                prices: Object.fromEntries(Object.entries(p.prices).filter(([k]) => keep.has(k))),
+              })),
+            })),
+          })),
+        };
+      }),
+    })),
+  };
 }

@@ -14,3 +14,7 @@ venv/
 
 # Local env for `netlify dev` (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSCODE)
 .env
+
+# Written by scripts/build-catalog.mjs on every build (from Supabase)
+site/prices.json
+netlify/generated/

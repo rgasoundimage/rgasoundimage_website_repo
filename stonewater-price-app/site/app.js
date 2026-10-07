@@ -1,16 +1,22 @@
 /* =========================================================
    RGA Price Catalogue — app logic
    ---------------------------------------------------------
-   CHANGE THE PASSCODE HERE  ↓↓↓  (one line)
+   The passcode is NOT in this file. It is the PRICE_PASSCODE
+   env var on Netlify, checked by netlify/functions/prices-full.
+   Locked, the app only has prices.json (customer prices); the
+   dealer/distributor prices arrive only after the server
+   accepts the passcode.
 ========================================================= */
-const PASSCODE = "stonewater";
-/* ========================================================= */
 
 const GATED = new Set(["dealer", "subdealer", "internal"]);
 const LS = {
   brand: "sw_brand", list: "sw_list", role: "sw_role", unlocked: "sw_unlocked",
-  collapsed: "sw_collapsed_", roleEnabled: "sw_roleEnabled", priceEnabled: "sw_priceEnabled"
+  collapsed: "sw_collapsed_", roleEnabled: "sw_roleEnabled", priceEnabled: "sw_priceEnabled",
+  pass: "sw_pass",                       // passcode, kept only while unlocked
+  dataPublic: "sw_data_public",          // last good prices.json
+  dataFull: "sw_data_full",              // last good full catalogue (unlocked only)
 };
+const FETCH_TIMEOUT_MS = 4000;           // then fall back to the saved copy
 
 const ROLES = [
   { id: "customer",  label: "Customer · retail" },
@@ -23,7 +29,8 @@ let DATA = null;
 let brandId = null;
 let listId = null;
 let role = "customer";
-let unlocked = localStorage.getItem(LS.unlocked) === "1";
+// Unlocked needs the passcode too: the full prices are re-fetched with it.
+let unlocked = localStorage.getItem(LS.unlocked) === "1" && !!localStorage.getItem(LS.pass);
 let pendingRole = null;          // role awaiting passcode
 let query = "";
 let roleEnabled = loadRoleEnabled();
@@ -300,26 +307,48 @@ $("passInput").addEventListener("keydown", (e) => { if (e.key === "Enter") tryUn
 $("passCancel").addEventListener("click", closeModal);
 $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
 
-function tryUnlock() {
-  if ($("passInput").value === PASSCODE) {
-    unlocked = true;
-    localStorage.setItem(LS.unlocked, "1");
-    const wasQuote = pendingQuote;
-    const target = pendingRole || role;
-    closeModal();
-    reflectTabs();
-    if (wasQuote) { pendingQuote = false; setTab("quote"); }
-    else setRole(target);
-  } else {
+// The server checks the passcode and, if it is right, returns every price.
+async function tryUnlock() {
+  const pass = $("passInput").value;
+  if (!pass) return;
+  const ok = $("passOk");
+  ok.disabled = true;
+  let full;
+  try {
+    full = await fetchFull(pass);
+  } catch (err) {
+    $("passErr").textContent = err.status === 401 ? "Incorrect passcode."
+      : "Couldn't check the passcode. Check your connection and try again.";
     $("passErr").hidden = false;
     $("passInput").select();
+    return;
+  } finally {
+    ok.disabled = false;
   }
+  unlocked = true;
+  localStorage.setItem(LS.unlocked, "1");
+  localStorage.setItem(LS.pass, pass);
+  saveCache(LS.dataFull, full);
+  const wasQuote = pendingQuote;
+  const target = pendingRole || role;
+  closeModal();
+  useData(full);
+  reflectTabs();
+  if (wasQuote) { pendingQuote = false; setTab("quote"); }
+  else setRole(target);
+}
+
+// Forget the passcode and every non-public price on this device.
+function lockDown() {
+  unlocked = false;
+  for (const k of ["unlocked", "pass", "dataFull"]) localStorage.removeItem(LS[k]);
+  const pub = loadCache(LS.dataPublic) || (DATA && publicView(DATA));
+  if (pub) useData(pub);
 }
 
 /* ---------- lock ---------- */
 $("lockBtn").addEventListener("click", () => {
-  unlocked = false;
-  localStorage.removeItem(LS.unlocked);
+  lockDown();
   setRole(defaultRole());
   reflectTabs();
   if (tab === "quote") setTab("catalogue");
@@ -946,21 +975,98 @@ $("picker").addEventListener("click", (e) => { if (e.target.id === "picker") clo
 /* ========================================================= */
 
 /* ---------- boot ---------- */
-async function boot() {
-  // Prices come from Supabase via netlify/functions/prices.mjs. Offline, the
-  // service worker answers with the last copy it saw.
-  try {
-    const res = await fetch("api/prices", { cache: "no-cache" });
-    // Offline with nothing cached, the service worker answers with index.html.
-    const body = await res.json().catch(() => ({ error: "you appear to be offline" }));
-    if (!res.ok || !body.brands) throw new Error(body.error || `HTTP ${res.status}`);
-    DATA = body;
-  } catch (err) {
-    $("results").innerHTML = `<div class="empty">Couldn't load prices: ${esc(err.message)}<br>Check your connection and reload.</div>`;
-    $("countLine").textContent = "No data";
-    return;
-  }
+/* ---------- data: cached first, refreshed in the background ----------
+   The app shows the last good copy on this device immediately, then fetches
+   a fresh one with a time limit. A slow or failed network never blanks the
+   screen once the app has loaded prices at least once. */
+let started = false;
 
+function loadCache(key) {
+  try { const d = JSON.parse(localStorage.getItem(key) || "null"); return d && d.brands ? d : null; }
+  catch { return null; }
+}
+function saveCache(key, d) {
+  try { localStorage.setItem(key, JSON.stringify(d)); } catch {}
+}
+
+async function fetchJSON(url, opts = {}) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), FETCH_TIMEOUT_MS);
+  let res;
+  try { res = await fetch(url, { ...opts, signal: ctl.signal }); }
+  catch { throw new Error("no connection"); }
+  finally { clearTimeout(timer); }
+  // Offline with nothing cached, the service worker answers with index.html.
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok || !body.brands) {
+    throw Object.assign(new Error(body.error || `HTTP ${res.status}`), { status: res.status });
+  }
+  return body;
+}
+const fetchPublic = () => fetchJSON("prices.json", { cache: "no-cache" });
+const fetchFull = (pass) => fetchJSON("api/prices-full", { method: "POST", headers: { "x-price-passcode": pass } });
+
+// Same rule as publicCatalog() on the server: customer prices only.
+function publicView(d) {
+  return { ...d, brands: d.brands.map((b) => ({ ...b, lists: b.lists.filter((L) => !L.internalOnly).map((L) => {
+    const keep = new Set(L.roles.customer || []);
+    return { ...L, categories: L.categories.map((c) => ({ ...c, subcategories: c.subcategories.map((s) => ({
+      ...s, products: s.products.map((p) => ({ ...p, prices: Object.fromEntries(
+        Object.entries(p.prices).filter(([k]) => keep.has(k))) })) })) })) };
+  }) })) };
+}
+
+// Install a catalogue and redraw. Quote lines keep the prices they copied in.
+function useData(d) {
+  DATA = d;
+  PRODUCT_INDEX = null;
+  if (!started) { started = true; startApp(); }
+  else {
+    populateBrands();
+    populateLists();
+    if (tab === "catalogue") render();
+  }
+  showUpdated();
+}
+
+function showUpdated() {
+  const el = $("updatedLine");
+  if (!el) return;
+  const t = DATA && DATA.generatedAt ? new Date(DATA.generatedAt) : null;
+  el.hidden = !t;
+  if (t) el.textContent = "Updated " + t.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+async function refresh() {
+  if (unlocked) {
+    try {
+      const full = await fetchFull(localStorage.getItem(LS.pass));
+      saveCache(LS.dataFull, full);
+      useData(full);
+      return;
+    } catch (err) {
+      if (err.status === 401) lockDown();       // passcode was changed: back to public
+      else if (DATA) return;                     // offline: keep the saved full copy
+    }
+  }
+  try {
+    const pub = await fetchPublic();
+    saveCache(LS.dataPublic, pub);
+    if (!unlocked) useData(pub);
+  } catch (err) {
+    if (!DATA) showLoadError(err);
+  }
+}
+
+function showLoadError(err) {
+  $("results").innerHTML = `<div class="empty">Couldn't load prices (${esc(err.message)}).<br>
+    Check your connection, then <button id="retryLoad" class="mini">Try again</button></div>`;
+  $("countLine").textContent = "No data";
+  const b = $("retryLoad");
+  if (b) b.onclick = () => { $("results").innerHTML = ""; refresh(); };
+}
+
+function startApp() {
   const savedBrand = localStorage.getItem(LS.brand);
   brandId = savedBrand && DATA.brands.some((b) => b.id === savedBrand) ? savedBrand : DATA.brands[0].id;
   populateBrands();
@@ -977,6 +1083,11 @@ async function boot() {
   $("lockBtn").hidden = !unlocked;
   reflectTabs();
   render();
+}
+
+async function boot() {
+  const cached = unlocked ? loadCache(LS.dataFull) : loadCache(LS.dataPublic);
+  if (cached) useData(cached);
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
@@ -988,5 +1099,7 @@ async function boot() {
       location.reload();
     });
   }
+
+  await refresh();
 }
 boot();

@@ -6,17 +6,18 @@
 [build]
   # Publish the static app folder.
   publish = "site"
-  # The only build step: stamp a fresh service-worker cache version
-  # (from the commit SHA) so redeploys are never stale. Prices are not built
-  # here — they are read from Supabase at request time (netlify/functions).
-  command = "node scripts/stamp-cache.mjs"
+  # 1. build-catalog: read the prices from Supabase ONCE and write
+  #    site/prices.json (public, customer prices) and
+  #    netlify/generated/catalog-full.mjs (bundled into prices-full). If
+  #    Supabase can't be read, the build fails and the last deploy stays live.
+  # 2. stamp-cache: fresh service-worker cache version per deploy.
+  command = "node scripts/build-catalog.mjs && node scripts/stamp-cache.mjs"
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
 [build.environment]
-  # 22+: @supabase/supabase-js needs native WebSocket. Functions run on this version too.
   NODE_VERSION = "22"
 
 # Icons. NOT `immutable`: these filenames are stable (icon-192.png keeps its
@@ -35,8 +36,15 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-# /api/prices        -> catalogue JSON from Supabase (read by app.js)
-# /api/admin-prices  -> admin-screen reads/writes (passcode-checked server-side)
+# Revalidated on every load (cheap 304 from the CDN), so a Publish shows up on
+# the next reload.
+[[headers]]
+  for = "/prices.json"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# /api/prices-full   -> every price, for the unlocked views (passcode-checked)
+# /api/admin-prices  -> admin-screen reads/writes/publish (passcode-checked)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"

@@ -1,10 +1,10 @@
-import { createHash, timingSafeEqual } from "node:crypto";
-import { supabaseAdmin, selectAll, json, LISTS, BRANDS } from "../lib/catalog.mjs";
+import { supabaseAdmin, selectAll, json, passcodeMatches, LISTS, BRANDS } from "../lib/catalog.mjs";
 
 // POST /api/admin-prices  (header: x-admin-passcode)
 //   { action: "list" }                    -> every product with its inputs + calculated prices
 //   { action: "save", product, prices }   -> create/update one product and its typed-in prices
 //   { action: "delete", id }              -> delete a product (its prices go with it)
+//   { action: "publish" }                 -> rebuild the site so the app shows the changes
 //
 // The passcode is checked HERE against the ADMIN_PASSCODE env var, never in the
 // browser: this endpoint writes with the service-role key.
@@ -30,19 +30,13 @@ export async function handler(event) {
     if (body.action === "list") return json(200, await listAll(supabase));
     if (body.action === "save") return json(200, await save(supabase, body));
     if (body.action === "delete") return json(200, await remove(supabase, body.id));
+    if (body.action === "publish") return json(200, await publish());
     return json(400, { error: `Unknown action "${body.action}"` });
   } catch (err) {
     if (err.status) return json(err.status, { error: err.message });
     console.error("admin-prices:", err);
     return json(500, { error: err.message || "Something went wrong" });
   }
-}
-
-function passcodeMatches(given, expected) {
-  // Hash both sides so the comparison is constant-time regardless of length.
-  const a = createHash("sha256").update(String(given)).digest();
-  const b = createHash("sha256").update(String(expected)).digest();
-  return timingSafeEqual(a, b);
 }
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -59,7 +53,11 @@ async function listAll(supabase) {
   ]);
   // The admin screen works in app brand ids; the database uses brand slugs.
   const idForSlug = Object.fromEntries(BRANDS.map((b) => [b.slug, b.id]));
+  // Latest edit time, so the screen can tell whether the published app is
+  // behind the database. (Deletes are tracked by the screen itself.)
+  const stamps = [...products.map((p) => p.updated_at), ...prices.map((r) => r.updated_at)].filter(Boolean);
   return {
+    lastChange: stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : null,
     brands: BRANDS.map((b) => ({ id: b.id, name: b.name, lists: b.lists })),
     lists: Object.fromEntries(Object.entries(LISTS).map(([id, L]) => [id, {
       label: L.label, inputs: L.inputs, labels: L.labels, percentKeys: L.percentKeys,
@@ -171,6 +169,17 @@ async function remove(supabase, id) {
   }
   if (error) throw new Error(error.message);
   return { deleted: id };
+}
+
+/* ---------- publish ---------- */
+// The app reads a static copy of the prices made at build time, so edits
+// reach it only after a rebuild. BUILD_HOOK_URL is this site's build hook.
+async function publish() {
+  const hook = process.env.BUILD_HOOK_URL;
+  if (!hook) throw new Error("BUILD_HOOK_URL is not set on this site");
+  const res = await fetch(hook, { method: "POST" });
+  if (!res.ok) throw new Error(`Netlify did not start the rebuild (HTTP ${res.status})`);
+  return { publishing: true };
 }
 
 /* ---------- helpers ---------- */

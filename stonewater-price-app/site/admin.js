@@ -95,6 +95,7 @@ $("lockAdmin").addEventListener("click", () => lock());
 const curBrand = () => DATA.brands.find((b) => b.id === brandId) || DATA.brands[0];
 
 function showEditor() {
+  checkPublished();
   $("login").hidden = true;
   $("editor").hidden = false;
   $("lockAdmin").hidden = false;
@@ -253,7 +254,8 @@ form().addEventListener("submit", async (e) => {
     if (i >= 0) DATA.products[i] = saved; else DATA.products.push(saved);
     closeEdit();
     render();
-    toast(`Saved ${saved.model}. The app shows it on next reload.`);
+    markDirty();
+    toast(`Saved ${saved.model}. Publish to update the app.`);
   } catch (err) {
     $("editErr").textContent = err.message;
     $("editErr").hidden = false;
@@ -271,11 +273,76 @@ $("deleteProduct").addEventListener("click", async () => {
     DATA.products = DATA.products.filter((x) => x.id !== id);
     closeEdit();
     render();
-    toast(`Deleted ${model}.`);
+    markDirty();
+    toast(`Deleted ${model}. Publish to update the app.`);
   } catch (err) {
     $("editErr").textContent = err.message;
     $("editErr").hidden = false;
   }
+});
+
+/* ---------- publish ----------
+   The app reads prices.json, a copy of the prices made when the site is
+   built. Edits reach it only after Publish (a rebuild, ~1–2 minutes). */
+let publishedAt = null;     // generatedAt of the live prices.json
+let sessionDirty = false;   // saved/deleted something this session
+let publishing = false;
+
+async function fetchPublishedAt() {
+  try {
+    const res = await fetch("prices.json", { cache: "no-store" });
+    const d = await res.json();
+    return d.generatedAt ? Date.parse(d.generatedAt) : null;
+  } catch { return null; }
+}
+async function checkPublished() {
+  publishedAt = await fetchPublishedAt();
+  updatePublishBar();
+}
+function markDirty() { sessionDirty = true; updatePublishBar(); }
+
+function isDirty() {
+  const last = DATA && DATA.lastChange ? Date.parse(DATA.lastChange) : null;
+  return sessionDirty || (last !== null && publishedAt !== null && last > publishedAt);
+}
+function updatePublishBar(msg) {
+  const bar = $("publishBar");
+  if (msg) { $("publishMsg").textContent = msg; bar.hidden = false; $("publishBtn").hidden = publishing; return; }
+  if (publishing) return;
+  bar.hidden = !isDirty();
+  $("publishBtn").hidden = false;
+  $("publishMsg").textContent = "You have changes the app doesn't show yet.";
+}
+
+$("publishBtn").addEventListener("click", async () => {
+  const btn = $("publishBtn");
+  btn.disabled = true;
+  try {
+    await api("publish");
+  } catch (err) {
+    toast(err.message, true);
+    return;
+  } finally {
+    btn.disabled = false;
+  }
+  const before = publishedAt || 0;
+  publishing = true;
+  sessionDirty = false;
+  updatePublishBar("Publishing… the app updates in about 1–2 minutes.");
+  // Watch for the new prices.json to go live (up to ~6 minutes).
+  for (let i = 0; i < 24; i++) {
+    await new Promise((r) => setTimeout(r, 15000));
+    const at = await fetchPublishedAt();
+    if (at && at > before) {
+      publishedAt = at;
+      publishing = false;
+      updatePublishBar("Published ✓ The app now shows your changes.");
+      setTimeout(() => updatePublishBar(), 6000);
+      return;
+    }
+  }
+  publishing = false;
+  updatePublishBar("Still publishing. Check the app again in a few minutes.");
 });
 
 /* ---------- toast ---------- */

@@ -59,3 +59,9 @@
 /* The shared .sheet tint (--surface2) is 4% opaque; over a long product list
    the form becomes unreadable. Same opaque fill the app's quote bar uses. */
 #editModal .sheet{background:#F4F5F8}
+
+/* Publish bar: the app shows a published copy until edits are published. */
+.publishbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:12px 16px 0;padding:10px 12px;border-radius:10px;font-size:13px;
+  background:var(--warn-soft);border:1px solid var(--warn-dim);color:var(--warn)}
+.publishbar .mini{background:var(--text);color:#FFFFFF;border-color:var(--text);flex-shrink:0}
