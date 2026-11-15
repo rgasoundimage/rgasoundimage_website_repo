@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PRF spike">
+<title>PRF spike (throwaway)</title>
+<!--
+  THROWAWAY test page. Never ship it. It answers one question:
+  "Does Face ID / Touch ID + WebAuthn PRF work when launched from the Home Screen icon on my iPhone?"
+
+  How to run (Step 0 of docs/HANDOFF-v2.7.0-biometric-unlock.md):
+   1. Copy this file to site/prf-spike.html on a scratch branch and let Netlify deploy it over HTTPS on the
+      SAME hostname the app uses (passkeys are bound to the hostname, so localhost or another domain proves nothing).
+   2. On the iPhone, open  https://<your-app-host>/prf-spike.html  in Safari. Run the three tests. Note the result.
+   3. Share > Add to Home Screen. Launch it FROM THE ICON (the first line must say standalone: true). Run again.
+   4. Delete the file from site/ afterwards.
+  No data is sent anywhere. Nothing is stored except the credential id in localStorage.
+-->
+<style>
+  body{font:15px/1.45 -apple-system,system-ui,sans-serif;margin:0;padding:calc(16px + env(safe-area-inset-top)) 16px 40px;color:#141943}
+  h1{font-size:18px;margin:0 0 8px}
+  button{display:block;width:100%;margin:10px 0;padding:14px;font-size:16px;font-weight:650;border:0;border-radius:11px;background:#141943;color:#fff}
+  button.sec{background:#e8e9f0;color:#141943}
+  pre{white-space:pre-wrap;word-break:break-word;background:#f4f5f8;border-radius:10px;padding:12px;font-size:12.5px;min-height:120px}
+  .ok{color:#157F4F;font-weight:700}.bad{color:#B3261E;font-weight:700}
+</style>
+</head>
+<body>
+<h1>WebAuthn PRF spike</h1>
+<pre id="env"></pre>
+<button id="b1">1 · Create passkey (Face ID / Touch ID)</button>
+<button id="b2">2 · Unlock: read PRF + decrypt</button>
+<button id="b3" class="sec">3 · Forget test passkey (this page only)</button>
+<pre id="out">Results appear here.</pre>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const log = (m, cls) => { $("out").innerHTML += "\n" + (cls ? `<span class="${cls}">${m}</span>` : m); };
+const hex = (u8) => [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
+const b64 = (u8) => btoa(String.fromCharCode(...u8));
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const KEY = "spike_cred", SALT = new TextEncoder().encode("rga-prices-vault-v1");
+
+const standalone = window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+(async () => {
+  let uvpa = "n/a";
+  try { uvpa = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); } catch (e) { uvpa = "error " + e.name; }
+  $("env").textContent =
+    `standalone: ${standalone}\nhost: ${location.hostname}\nsecure context: ${isSecureContext}\n` +
+    `PublicKeyCredential: ${typeof PublicKeyCredential !== "undefined"}\nplatform authenticator: ${uvpa}\n` +
+    `UA: ${navigator.userAgent}`;
+})();
+
+$("b1").onclick = async () => {
+  $("out").textContent = "Creating…";
+  try {
+    const cred = await navigator.credentials.create({ publicKey: {
+      rp: { name: "RGA Prices spike", id: location.hostname },
+      user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "spike", displayName: "RGA Prices spike" },
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "preferred", userVerification: "required" },
+      extensions: { prf: { eval: { first: SALT } } },
+    }});
+    const ext = cred.getClientExtensionResults();
+    localStorage.setItem(KEY, b64(new Uint8Array(cred.rawId)));
+    log("created. rawId saved.", "ok");
+    log("prf.enabled = " + JSON.stringify(ext.prf && ext.prf.enabled), ext.prf && ext.prf.enabled ? "ok" : "bad");
+    log("prf.results at create = " + (ext.prf && ext.prf.results ? "present" : "absent (normal; step 2 reads it)"));
+  } catch (e) { log(`FAILED: ${e.name}: ${e.message}`, "bad"); }
+};
+
+async function prfOnce() {
+  const id = unb64(localStorage.getItem(KEY) || "");
+  const a = await navigator.credentials.get({ publicKey: {
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    rpId: location.hostname, allowCredentials: [{ type: "public-key", id }],
+    userVerification: "required", extensions: { prf: { eval: { first: SALT } } },
+  }});
+  const r = a.getClientExtensionResults().prf;
+  return r && r.results && r.results.first ? new Uint8Array(r.results.first) : null;
+}
+
+$("b2").onclick = async () => {
+  $("out").textContent = "Waiting for Face ID / Touch ID…";
+  if (!localStorage.getItem(KEY)) return log("Run step 1 first.", "bad");
+  try {
+    const k1 = await prfOnce();
+    if (!k1) return log("PRF RESULT MISSING. PRF does not work in this context. (Decision gate: see PRD §9.)", "bad");
+    log("PRF secret returned, " + k1.length + " bytes, starts " + hex(k1.slice(0, 4)), "ok");
+    const key = await crypto.subtle.importKey("raw", k1, "AES-GCM", false, ["encrypt", "decrypt"]);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode("vault ok"));
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+    log("AES-GCM round trip: " + new TextDecoder().decode(pt), "ok");
+    log("Now tap step 2 AGAIN. The 4 bytes after “starts” must be IDENTICAL both times (deterministic key).");
+  } catch (e) { log(`FAILED: ${e.name}: ${e.message}`, "bad"); }
+};
+
+$("b3").onclick = () => { localStorage.removeItem(KEY); $("out").textContent = "Forgotten here. Delete the passkey in Settings > Passwords too."; };
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v2.7.0 mockups — Face ID / Touch ID unlock</title>
+<!-- Uses the app's real stylesheet and tokens (../../site/styles.css), so what you see is what
+     the build will look like. Only the rules in the <style> block below are NEW; they are the CSS
+     to add to styles.css in the build. -->
+<link rel="stylesheet" href="../../site/styles.css">
+<style>
+  /* ---------- mockup page chrome (not part of the app) ---------- */
+  body{padding:28px 20px 60px;background:#E9EBF1;overflow-x:auto}
+  h1{font-size:20px;margin:0 0 4px}
+  .lede{max-width:780px;color:var(--muted);font-size:14px;margin:0 0 26px;line-height:1.5}
+  .row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .item{width:390px}
+  .cap{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin:0 0 4px}
+  .note{font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.45;min-height:56px}
+  .frame{position:relative;width:390px;height:660px;overflow:hidden;background:#fff;
+    border:1px solid var(--border);border-radius:26px;box-shadow:0 6px 24px rgba(20,25,67,.12)}
+  .frame .modal{position:absolute}
+  .frame .topbar{position:static}
+  .frame .scroll{height:100%;overflow:hidden}
+  .legend{max-width:780px;margin-top:34px;font-size:13px;line-height:1.55;color:var(--text)}
+  .legend h2{font-size:15px;margin:18px 0 6px}
+  .legend code{background:var(--surface3);padding:1px 5px;border-radius:5px;font-size:12px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;
+    background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-dim);margin-left:6px}
+
+  /* ---------- NEW CSS for the build (move into site/styles.css) ---------- */
+  .bio-card{
+    display:flex;align-items:center;gap:12px;margin:2px 16px 10px;padding:12px 12px 12px 14px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  }
+  .bio-card .bio-ic{flex-shrink:0;width:34px;height:34px;color:var(--text)}
+  .bio-card .bio-txt{flex:1;min-width:0;font-size:13px;line-height:1.35;color:var(--muted)}
+  .bio-card .bio-txt b{display:block;color:var(--text);font-size:14px;font-weight:650;margin-bottom:1px}
+  .bio-card .bio-act{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+  .bio-card .bio-act .mini{padding:8px 12px;font-size:13px;font-weight:650}
+  .bio-card .bio-act .mini.pri{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .locked .bio-ic-lg{width:56px;height:56px;color:var(--text)}
+  .locked .btn.bio{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:330px;white-space:nowrap}
+  .locked .btn.bio svg{width:22px;height:22px}
+  .locked .linkbtn{background:none;border:none;color:var(--muted);font-size:14px;font-weight:600;
+    text-decoration:underline;text-underline-offset:3px;padding:8px}
+  .bio-row{display:flex;align-items:center;gap:12px;padding:13px 4px}
+  .bio-row .bio-state{flex:1;font-size:15px}
+  .bio-row .bio-state small{display:block;color:var(--muted2);font-size:11.5px;margin-top:2px}
+  .passnote{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.4;
+    background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-dim)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Generic "scan" glyph: corner brackets + a face-like mark. Drawn here; not Apple's Face ID icon. -->
+  <symbol id="bio" viewBox="0 0 32 32">
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 11V8a4 4 0 0 1 4-4h3M21 4h3a4 4 0 0 1 4 4v3M28 21v3a4 4 0 0 1-4 4h-3M11 28H8a4 4 0 0 1-4-4v-3"/>
+      <path d="M12 12v3M20 12v3M16 14v4h-1.5M12.5 21.2c1.9 1.7 5.1 1.7 7 0"/>
+    </g>
+  </symbol>
+</svg>
+
+<h1>v2.7.0 — Face ID / Touch ID unlock · mockups</h1>
+<p class="lede">Four screens at 390&nbsp;px, built from the live <code>styles.css</code>. Layout and every existing control are unchanged; only the items marked <em>new</em> are added. All of this only appears on a device that supports it (iOS/macOS 18+); everywhere else the app looks exactly as it does today.</p>
+
+<div class="row">
+
+  <!-- 1. OPT-IN CARD -->
+  <div class="item">
+    <p class="cap">1 · Opt-in card <span class="tag">new</span></p>
+    <p class="note">Shown once, after a successful passcode unlock, on a supported device that isn't enrolled yet. “Not now” hides it for 30 days; Settings keeps the option.</p>
+    <div class="frame"><div class="scroll">
+      <header class="topbar">
+        <div class="brand"><span class="brand-select" style="display:block;background-image:none">Stonewater</span><span class="brand-sub">Price Catalogue</span></div>
+        <img class="brand-logo" src="../../site/icons/rga-logo.png" width="20" height="38" alt="">
+        <div class="top-right"><span class="iconbtn">⚙</span></div>
+      </header>
+      <div class="tabs"><span class="tab active">Catalogue</span><span class="tab">Quote</span></div>
+      <div class="controls">
+        <label class="field"><span>Price list</span><select><option>Price List</option></select></label>
+        <label class="field"><span>View</span><select><option>Internal · all</option></select></label>
+        <span class="lockbtn">Lock</span>
+      </div>
+      <div class="bio-card">
+        <svg class="bio-ic"><use href="#bio"/></svg>
+        <div class="bio-txt"><b>Unlock faster</b>Use Face ID / Touch ID instead of the passcode on this device.</div>
+        <div class="bio-act"><button class="mini pri">Turn on</button><button class="mini">Not now</button></div>
+      </div>
+      <div class="searchwrap"><input id="search" type="search" placeholder="Search model or description…" style="width:100%"></div>
+      <p class="empty" style="padding:30px 20px">…product list continues…</p>
+    </div></div>
+  </div>
+
+  <!-- 2. LOCKED, ENROLLED -->
+  <div class="item">
+    <p class="cap">2 · Locked on an enrolled device <span class="tag">new</span></p>
+    <p class="note">The existing locked panel, plus a primary biometric button and a quiet “Use passcode” link. It's a button because iOS only starts Face ID from a tap.</p>
+    <div class="frame"><div class="scroll">
+      <header class="topbar">
+        <div class="brand"><span class="brand-select" style="display:block;background-image:none">Stonewater</span><span class="brand-sub">Price Catalogue</span></div>
+        <img class="brand-logo" src="../../site/icons/rga-logo.png" width="20" height="38" alt="">
+        <div class="top-right"><span class="iconbtn">⚙</span></div>
+      </header>
+      <div class="tabs"><span class="tab active">Catalogue</span><span class="tab">Quote <span class="tablock">🔒</span></span></div>
+      <div class="controls">
+        <label class="field"><span>Price list</span><select><option>Price List</option></select></label>
+        <label class="field"><span>View</span><select><option>Dealer 🔒</option></select></label>
+      </div>
+      <div class="locked">
+        <svg class="bio-ic-lg"><use href="#bio"/></svg>
+        <p>This view is locked.<br>Unlock to see pricing.</p>
+        <button class="btn bio"><svg><use href="#bio"/></svg>Unlock with Face ID / Touch ID</button>
+        <button class="linkbtn">Use passcode</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 3. SETTINGS -->
+  <div class="item">
+    <p class="cap">3 · Settings row <span class="tag">new</span></p>
+    <p class="note">One new section at the top of Settings. Left: enrolled. The same row reads “Not set up · Turn on” when it isn't, and the whole section is absent on unsupported devices.</p>
+    <div class="frame">
+      <div class="modal"><div class="sheet sheet-scroll">
+        <h2>Settings</h2>
+        <div class="set-section">
+          <div class="set-head">Face ID / Touch ID</div>
+          <div class="bio-row">
+            <svg class="bio-ic" style="width:28px;height:28px"><use href="#bio"/></svg>
+            <div class="bio-state">On for this device<small>Locks after 5 min in the background</small></div>
+            <button class="mini">Turn off</button>
+          </div>
+        </div>
+        <div class="set-section">
+          <div class="set-head">Views in dropdown</div>
+          <label class="chk"><input type="checkbox" checked><span>Customer · retail</span></label>
+          <label class="chk"><input type="checkbox" checked><span>Dealer 🔒</span></label>
+          <label class="chk"><input type="checkbox" checked><span>Sub-dealer 🔒</span></label>
+          <label class="chk"><input type="checkbox" checked><span>Internal · all 🔒</span></label>
+        </div>
+        <div class="modal-actions"><button class="btn">Done</button></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 4. RECOVERY -->
+  <div class="item">
+    <p class="cap">4 · Recovery to passcode <span class="tag">new message</span></p>
+    <p class="note">If the passkey was deleted, or the server passcode was changed, the vault is cleared and the normal passcode sheet appears with one explanatory line. Nothing else changes.</p>
+    <div class="frame">
+      <div class="modal"><div class="sheet">
+        <h2>Dealer pricing</h2>
+        <p class="passnote">Face ID / Touch ID needs setting up again. Enter the passcode to continue.</p>
+        <div class="passrow">
+          <input id="passInput" type="password" value="stonewater" readonly>
+          <button class="reveal" type="button">Show</button>
+        </div>
+        <div class="modal-actions"><button class="btn ghost">Cancel</button><button class="btn">Unlock</button></div>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <h2>What does not change</h2>
+  Customer view needs no unlock. Devices that haven't turned this on behave exactly as in 2.6.2, including the passcode sheet and the Lock button. Navy <code>#141943</code> and white only; no new colours except the existing <code>--warn</code> tokens for the recovery note.
+  <h2>States with no screen of their own</h2>
+  <b>Unsupported device (iOS ≤17, or a passkey manager without PRF):</b> the card, the Settings section and the biometric button are never rendered. <b>User cancels the Face ID prompt:</b> stays on screen 2, no error banner. <b>Offline unlock:</b> identical to screen 2, then straight into the saved catalogue.
+</div>
+
+</body>
+</html>
