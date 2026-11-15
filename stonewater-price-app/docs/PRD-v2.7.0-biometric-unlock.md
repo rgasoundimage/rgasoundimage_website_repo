@@ -4,7 +4,7 @@
 **Base version:** 2.6.2 (repo `main`, commit `069d74c`)
 **Proposed version:** 2.7.0 (minor, new feature, opt-in per device)
 **Scope of change:** `site/app.js`, `site/index.html`, `site/styles.css`, `site/sw.js`, new `site/bio.js`, new `tests/biometric-vault.test.mjs`. No server change, no database change, no `prices.json` change.
-**Status:** PRD APPROVED 2026-11-15 (decisions D1–D4 below). Mockups drafted: `docs/mockups/v2.7.0-biometric-unlock.html`, awaiting approval. Build happens in Claude Code, see `docs/HANDOFF-v2.7.0-biometric-unlock.md`.
+**Status:** PRD APPROVED 2026-11-15 (decisions D1–D4 below). Mockups (`docs/mockups/v2.7.0-biometric-unlock.html`) APPROVED 2026-11-15. Build happens in Claude Code, see `docs/HANDOFF-v2.7.0-biometric-unlock.md`.
 
 Confidence tags: **[Certain]** read in the code or documented; **[Likely]** strong inference; **[Guessing]** must be proven on a real device.
 
@@ -71,6 +71,14 @@ After a successful passcode unlock, if PRF is supported and the device is not ye
 - **Auto-lock (enrolled devices only):** cold start, and returning after the app has been hidden longer than N minutes (D2). Devices that haven't enrolled behave exactly as in 2.6.2.
 - On an enrolled device the passcode is kept **in memory only** while unlocked; background refresh uses that memory copy (`refresh()` currently reads `LS.pass`).
 
+### 4.6 Refreshing the vault (D7)
+Re-encrypting needs the vault key, and getting that key normally costs a Face ID prompt. Auto-lock cannot show a prompt (iOS needs a tap). So:
+
+- When the user unlocks with Face ID / Touch ID, the app keeps the derived key **in memory only, as a non-extractable WebCrypto key**, for that session. It is never written to storage and disappears when the page closes.
+- **At lock time** (Lock button, auto-lock, or the page going to the background) the app re-encrypts the current passcode and catalogue with that in-memory key. No prompt.
+- If there is no in-memory key (the session was unlocked with the passcode, or iOS closed the page before it could lock), the vault is left as it was. It is then as old as the last biometric session. Online unlocks are unaffected, because the server is always asked for fresh prices; only an **offline** unlock shows the older copy, and the footer's "Updated <date>" shows how old.
+- Enrolment writes the first vault with its own key.
+
 ### 4.4 Locked screen on an enrolled device
 The existing locked panel gets a primary button **Unlock with Face ID / Touch ID** and a secondary **Use passcode**. It must be a button: iOS requires a user tap to start the biometric prompt, so I can't auto-prompt on launch. [Likely]
 
@@ -131,6 +139,7 @@ Manual, on your iPhone (I can't do these):
 | D4 | Delivery | **Handoff for development in Claude Code**: branch `feature/v2.7.0-biometric-unlock` with PRD, mockups, handoff and spike; nothing on `main`. Final release is still a complete folder-replacement zip per the standing rule |
 | D5 | Admin screen biometric | **Out of scope** (default, not explicitly confirmed) |
 | D6 | Label "Face ID / Touch ID" everywhere | **Yes** (default, not explicitly confirmed) |
+| D7 | When the encrypted copy of the prices is refreshed | **Approved: at lock time only** (not on every price refresh). Mechanism in 4.6 |
 
 ## 9. Risks
 

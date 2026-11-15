@@ -24,7 +24,7 @@ The whole design depends on WebAuthn **PRF** working when the app is launched **
 
 ## 1. Rules for this project (from the owner's standing workflow)
 
-- PRD first, mockups approved before build. PRD is approved; **mockups still need the owner's OK**. Ask before building the UI.
+- PRD first, mockups approved before build. PRD **and mockups are approved** (2026-11-15).
 - **Release = a complete folder-replacement zip**, never a partial overlay. Include `site/`, `tests/`, `scripts/`, `docs/`, `netlify/`, `supabase/`, `netlify.toml`, `package.json`, `CHANGELOG.md`, `README.md`. **Before packaging, ask whether to include `site/prices.json` and `data/*.xlsx`.** (A partial overlay once wiped `prices.json`, icons and a test file.)
 - Deploy path: VS Code / Claude Code → GitHub → Netlify auto-deploy. Do not push to `main` without the owner saying so.
 - If a Claude Code session and a chat session produce different versions of a file, **the Code session wins**.
@@ -65,7 +65,8 @@ RGABio.supported()                 -> Promise<boolean>   // PublicKeyCredential 
 RGABio.enrolled()                  -> boolean            // vault present in localStorage
 RGABio.enrol({passcode, catalogue})-> Promise<void>      // create passkey (random user.id), get PRF, encrypt, verify-by-decrypt, store
 RGABio.unlock()                    -> Promise<{passcode, catalogue}>   // get with PRF, decrypt; throws typed errors
-RGABio.remove()                    -> void
+RGABio.reseal({passcode, catalogue}) -> Promise<boolean>   // re-encrypt with the in-memory session key; false if none
+RGABio.remove()                    -> void   // also drops the session key
 ```
 Typed errors for the app to branch on: `cancelled` (user dismissed, silent), `unsupported`, `no-prf`, `decrypt-failed` (passkey deleted or tampered → remove vault, passcode modal with the recovery line), `no-vault`.
 
@@ -91,7 +92,7 @@ Typed errors for the app to branch on: `cancelled` (user dismissed, silent), `un
 6. Biometric unlock handler: `RGABio.unlock()` → `{passcode, catalogue}` → set `memPass`, `unlocked = true`, `useData(catalogue)` straight away (works offline), then call `fetchFull(passcode)` in the background. On **401** → `RGABio.remove()` + passcode modal with the recovery line. On network failure → keep the vault catalogue and retry on the next `refresh()`.
 7. After a successful passcode `tryUnlock()`, if `await RGABio.supported()` and not enrolled and not snoozed (`sw_bioSnooze` < 30 days) → show the opt-in card (mockup 1). "Turn on" → `enrol`. "Not now" → set snooze.
 8. Settings (L376): add the *Face ID / Touch ID* section (mockup 3) only when supported. **Turn off** → `RGABio.remove()`.
-9. When the catalogue refreshes while unlocked on an enrolled device, **re-encrypt the vault** with the new catalogue (needs one more biometric prompt, so don't do it silently every refresh). Simplest acceptable rule: refresh the vault only at Lock time **if** it's older than the live data, or skip and let `generatedAt` show staleness; pick one, document it in CHANGELOG. **Open question for the owner if it's not obvious.**
+9. **Vault refresh = at lock time only (decided, PRD §4.6).** Keep the key from `RGABio.unlock()` / `enrol()` as a **non-extractable `CryptoKey` in memory only** for the session. On Lock button, auto-lock, and `visibilitychange → hidden`, call `RGABio.reseal({passcode, catalogue})`: it re-encrypts with the in-memory key and returns `false` (leaving the vault alone) if there is no key. No Face ID prompt is involved. Never persist the key. If the page is killed before a lock, the vault stays as it was; offline unlock then shows the older copy and the footer's "Updated" date says how old. Add a test for each branch.
 10. Labels: "Face ID / Touch ID" everywhere (D6).
 
 ### 3.4 Other files
@@ -123,6 +124,5 @@ The runner runs each `*.test.mjs` in its own process; match the style of `quote-
 Anyone who knows the iPhone passcode can pass Face ID; each device enrols separately; Home Screen app and Safari tab have separate storage; one passkey per enrolment accumulates in iOS Passwords. Details in PRD §5.
 
 ## 7. Open points
-- Mockups: awaiting owner approval (D-level change requests go back to the PRD).
-- Vault refresh policy (§3.3 item 9).
+- None blocking. Mockups and the vault refresh policy are decided. The only gate is the section 0 spike.
 - Admin screen biometric: out of scope this release (D5).
