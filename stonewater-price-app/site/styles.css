@@ -515,3 +515,33 @@ button,input,select{font-family:inherit}
 /* v2.6.0 — link to the admin screen (Settings sheet) */
 .adminlink{color:var(--text);text-decoration:none;justify-content:space-between}
 .adminlink span:last-child{flex:0;color:var(--muted)}
+
+/* ===== v2.7.0 Face ID / Touch ID (copied from docs/mockups/v2.7.0-biometric-unlock.html) ===== */
+  .bio-card{
+    display:flex;align-items:center;gap:12px;margin:2px 16px 10px;padding:12px 12px 12px 14px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  }
+  .bio-card .bio-ic{flex-shrink:0;width:34px;height:34px;color:var(--text)}
+  .bio-card .bio-txt{flex:1;min-width:0;font-size:13px;line-height:1.35;color:var(--muted)}
+  .bio-card .bio-txt b{display:block;color:var(--text);font-size:14px;font-weight:650;margin-bottom:1px}
+  .bio-card .bio-act{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+  .bio-card .bio-act .mini{padding:8px 12px;font-size:13px;font-weight:650}
+  .bio-card .bio-act .mini.pri{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .locked .bio-ic-lg{width:56px;height:56px;color:var(--text)}
+  .locked .btn.bio{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:330px;white-space:nowrap}
+  .locked .btn.bio svg{width:22px;height:22px}
+  .locked .linkbtn{background:none;border:none;color:var(--muted);font-size:14px;font-weight:600;
+    text-decoration:underline;text-underline-offset:3px;padding:8px}
+  .bio-row{display:flex;align-items:center;gap:12px;padding:13px 4px}
+  .bio-row .bio-state{flex:1;font-size:15px}
+  .bio-row .bio-state small{display:block;color:var(--muted2);font-size:11.5px;margin-top:2px}
+  .passnote{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.4;
+    background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-dim)}
+/* additions the mockup did not need: messages next to the card, in the locked panel, state line in Settings */
+.bio-err{margin:0 16px 10px}
+.locked .passnote{max-width:330px;text-align:left}
+.bio-row .bio-state span{display:block}
+.bio-row .mini:disabled{opacity:.45}
+.bio-card .mini:disabled{opacity:.6}
+/* the hidden Face ID section is still the sheet's first div: keep the next one looking like the first (2.6.2) */
+.set-section[hidden] + .set-section{border-top:none;padding-top:4px}

@@ -4,7 +4,7 @@ const CACHE = "stonewater-dev";
 const ASSETS = [
   // Price data is not precached here: app.js keeps its own last-good copy in
   // localStorage (and the fetch handler below caches prices.json too).
-  "./", "index.html", "styles.css", "app.js", "expr.js",
+  "./", "index.html", "styles.css", "app.js", "expr.js", "bio.js",
   "manifest.webmanifest",
   "icons/rga-logo.png",
   // ?v= is deliberate. netlify.toml serves /icons/* with `immutable`, so a client

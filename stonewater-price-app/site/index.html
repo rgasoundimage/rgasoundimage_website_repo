@@ -15,6 +15,16 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- v2.7.0: generic "scan" glyph for the Face ID / Touch ID buttons (drawn here; not Apple's icon). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="bio" viewBox="0 0 32 32">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 11V8a4 4 0 0 1 4-4h3M21 4h3a4 4 0 0 1 4 4v3M28 21v3a4 4 0 0 1-4 4h-3M11 28H8a4 4 0 0 1-4-4v-3"/>
+        <path d="M12 12v3M20 12v3M16 14v4h-1.5M12.5 21.2c1.9 1.7 5.1 1.7 7 0"/>
+      </g>
+    </symbol>
+  </svg>
+
   <header class="topbar">
     <div class="brand">
       <select id="brandSelect" class="brand-select" aria-label="Select brand"></select>
@@ -43,6 +53,14 @@
     </label>
     <button id="lockBtn" class="lockbtn" hidden title="Lock sensitive views">Lock</button>
   </div>
+
+  <!-- v2.7.0 opt-in card: shown by app.js only on a supported, not-yet-enrolled device, after a passcode unlock. -->
+  <div id="bioCard" class="bio-card" hidden>
+    <svg class="bio-ic" aria-hidden="true"><use href="#bio"/></svg>
+    <div class="bio-txt"><b>Unlock faster</b>Use Face ID / Touch ID instead of the passcode on this device. You'll be asked twice the first time.</div>
+    <div class="bio-act"><button id="bioOn" class="mini pri" type="button">Turn on</button><button id="bioNot" class="mini" type="button">Not now</button></div>
+  </div>
+  <p id="bioErr" class="passnote bio-err" role="status" hidden></p>
 
   <div class="searchwrap" id="searchwrap">
     <input id="search" type="search" inputmode="search" placeholder="Search model or description…" autocomplete="off" />
@@ -84,6 +102,7 @@
     <div class="sheet">
       <h2 id="modalTitle">Enter passcode</h2>
       <p class="modal-sub">This view shows non-public pricing.</p>
+      <p id="passNote" class="passnote" hidden></p>
       <div class="passrow">
         <input id="passInput" type="password" inputmode="text" placeholder="Passcode" autocomplete="off" autocapitalize="off" spellcheck="false" />
         <button id="passToggle" type="button" class="reveal">Show</button>
@@ -100,6 +119,17 @@
   <div id="settings" class="modal" hidden>
     <div class="sheet sheet-scroll">
       <h2>Settings</h2>
+
+      <!-- v2.7.0: only shown by app.js when this device supports it (or is enrolled). -->
+      <div id="bioSettings" class="set-section" hidden>
+        <div class="set-head">Face ID / Touch ID</div>
+        <div class="bio-row">
+          <svg class="bio-ic" style="width:28px;height:28px" aria-hidden="true"><use href="#bio"/></svg>
+          <div class="bio-state"><span id="bioStateTxt"></span><small id="bioStateSub"></small></div>
+          <button id="bioToggle" class="mini" type="button">Turn on</button>
+        </div>
+        <p id="bioSetErr" class="passnote" role="status" hidden></p>
+      </div>
 
       <div class="set-section">
         <div class="set-head">Views in dropdown</div>
@@ -132,6 +162,9 @@
   <!-- expr.js defines window.RGAExpr and MUST load before app.js: the quote
        price field calls it on the first keystroke. -->
   <script src="expr.js"></script>
+  <!-- bio.js defines window.RGABio (Face ID / Touch ID vault) and MUST load before app.js:
+       app.js asks it at startup whether this device is enrolled. -->
+  <script src="bio.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -15,8 +15,23 @@ const LS = {
   pass: "sw_pass",                       // passcode, kept only while unlocked
   dataPublic: "sw_data_public",          // last good prices.json
   dataFull: "sw_data_full",              // last good full catalogue (unlocked only)
+  bioSnooze: "sw_bioSnooze",             // when "Not now" was tapped on the Face ID card
+  bioNo: "sw_bioNo",                     // user agent of a device that turned out to have no PRF
 };
 const FETCH_TIMEOUT_MS = 4000;           // then fall back to the saved copy
+
+/* ---------- Face ID / Touch ID (v2.7.0; bio.js) ----------
+   Everything below is inert unless this device is ENROLLED, i.e. bio.js is loaded
+   and holds a vault. A device that never turned it on follows the 2.6.2 code paths
+   unchanged. */
+const BIO_AUTOLOCK_MS = 5 * 60 * 1000;   // hidden longer than this -> lock on return (PRD D2)
+const BIO_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;   // "Not now" hides the card for 30 days
+const BIO_RECOVERY_NOTE = "Face ID / Touch ID needs setting up again. Enter the passcode to continue.";
+const bioOn = () => !!(window.RGABio && window.RGABio.enrolled());
+let memPass = null;              // passcode while unlocked on an enrolled device (memory only)
+let hiddenAt = 0;                // when the page last went to the background
+let bioBusy = false;             // a Face ID / Touch ID prompt is open
+let bioCardWanted = false;       // the opt-in card should be showing (when unlocked, on the catalogue tab)
 
 const ROLES = [
   { id: "customer",  label: "Customer · retail" },
@@ -30,6 +45,9 @@ let brandId = null;
 let listId = null;
 let role = "customer";
 // Unlocked needs the passcode too: the full prices are re-fetched with it.
+// An enrolled device always starts locked (cold start = locked, PRD D2) and drops any
+// plain-text copy a crash or older version may have left behind.
+if (bioOn()) for (const k of ["unlocked", "pass", "dataFull"]) localStorage.removeItem(LS[k]);
 let unlocked = localStorage.getItem(LS.unlocked) === "1" && !!localStorage.getItem(LS.pass);
 let pendingRole = null;          // role awaiting passcode
 let query = "";
@@ -190,7 +208,9 @@ function render() {
 
   // Gated view, still locked → show an unlock prompt instead of products.
   if (GATED.has(role) && !unlocked) {
-    root.innerHTML = `<div class="locked">
+    root.innerHTML = bioOn()
+      ? bioLockedHTML("This view is locked.<br>Unlock to see pricing.", "lockedUnlock", "")
+      : `<div class="locked">
         <div class="ic">🔒</div>
         <p>This view is locked.<br>Enter the passcode to see pricing.</p>
         <button id="lockedUnlock" class="btn">Enter passcode</button>
@@ -200,6 +220,7 @@ function render() {
     $("viewLine").textContent = roleName(role);
     const ub = $("lockedUnlock");
     if (ub) ub.onclick = () => { pendingRole = role; openModal(role); };
+    wireBioButton("");
     return;
   }
 
@@ -275,16 +296,18 @@ listSel.addEventListener("change", () => {
 roleSel.addEventListener("change", () => {
   const wanted = roleSel.value;
   setRole(wanted);                       // shows products, or a locked panel if gated
-  if (GATED.has(wanted) && !unlocked) {
+  if (GATED.has(wanted) && !unlocked && !bioOn()) {   // enrolled: the locked panel offers Face ID first
     pendingRole = wanted;
     openModal(wanted);
   }
 });
 
 /* ---------- passcode modal ---------- */
-function openModal(wanted, customTitle) {
+function openModal(wanted, customTitle, note) {
   const titles = { dealer: "Dealer pricing", subdealer: "Sub-dealer pricing", internal: "Internal pricing" };
   $("modalTitle").textContent = customTitle || titles[wanted] || "Enter passcode";
+  const pn = $("passNote");                      // optional one-line explanation (v2.7.0 recovery)
+  if (pn) { pn.hidden = !note; pn.textContent = note || ""; }
   $("passErr").hidden = true;
   $("passInput").value = "";
   $("passInput").type = "password";
@@ -326,9 +349,13 @@ async function tryUnlock() {
     ok.disabled = false;
   }
   unlocked = true;
-  localStorage.setItem(LS.unlocked, "1");
-  localStorage.setItem(LS.pass, pass);
-  saveCache(LS.dataFull, full);
+  if (bioOn()) {
+    memPass = pass;                              // enrolled: memory only, nothing readable is written
+  } else {
+    localStorage.setItem(LS.unlocked, "1");
+    localStorage.setItem(LS.pass, pass);
+    saveCache(LS.dataFull, full);
+  }
   const wasQuote = pendingQuote;
   const target = pendingRole || role;
   closeModal();
@@ -336,23 +363,29 @@ async function tryUnlock() {
   reflectTabs();
   if (wasQuote) { pendingQuote = false; setTab("quote"); }
   else setRole(target);
+  maybeOfferBio();
 }
 
 // Forget the passcode and every non-public price on this device.
 function lockDown() {
   unlocked = false;
+  memPass = null;                                // the vault (sw_vault) is kept; only readable copies go
+  bioCardWanted = false;
+  bioMsg("");
   for (const k of ["unlocked", "pass", "dataFull"]) localStorage.removeItem(LS[k]);
   const pub = loadCache(LS.dataPublic) || (DATA && publicView(DATA));
   if (pub) useData(pub);
 }
 
 /* ---------- lock ---------- */
-$("lockBtn").addEventListener("click", () => {
+function doLock() {
+  bioSeal();                                     // enrolled only: refresh the encrypted copy first
   lockDown();
   setRole(defaultRole());
   reflectTabs();
   if (tab === "quote") setTab("catalogue");
-});
+}
+$("lockBtn").addEventListener("click", doLock);
 
 /* ---------- settings ---------- */
 const setCbs = () => [...document.querySelectorAll('#settings input[data-role]')];
@@ -378,6 +411,7 @@ $("settingsBtn").addEventListener("click", () => {
   $("setErr").hidden = true;
   buildPriceChecks();
   $("settings").hidden = false;
+  refreshBioSettings();
 });
 $("priceAll").addEventListener("click", () => {
   const cbs = priceCbs();
@@ -435,6 +469,7 @@ function reflectTabs() {
   $("tabCatalogue").classList.toggle("active", tab === "catalogue");
   $("tabQuote").classList.toggle("active", tab === "quote");
   $("quoteLockIc").hidden = unlocked;
+  reflectBioCard();
 }
 function showCatalogue(show) {
   $("controls").hidden = !show;
@@ -447,6 +482,7 @@ function showCatalogue(show) {
 function setTab(t) {
   if (t === "quote" && !unlocked) {
     tab = "quote"; reflectTabs(); showCatalogue(false); renderQuote();
+    if (bioOn()) return;                         // enrolled: the locked panel offers Face ID first
     pendingQuote = true; openModal("quote", "Quote — internal pricing");
     return;
   }
@@ -525,13 +561,16 @@ function buildProductIndex() {
 function renderQuote() {
   const q = $("quote");
   if (!unlocked) {
-    q.innerHTML = `<div class="locked">
+    q.innerHTML = bioOn()
+      ? bioLockedHTML("The Quote Builder is internal.<br>Unlock to use it.", "qUnlock", "Q")
+      : `<div class="locked">
         <div class="ic">🔒</div>
         <p>The Quote Builder is internal.<br>Enter the passcode to use it.</p>
         <button id="qUnlock" class="btn">Enter passcode</button>
       </div>`;
     const ub = $("qUnlock");
     if (ub) ub.onclick = () => { pendingQuote = true; openModal("quote", "Quote — internal pricing"); };
+    wireBioButton("Q");
     return;
   }
   const lines = quote.length
@@ -972,6 +1011,206 @@ $("pickResults").addEventListener("click", (e) => {
 $("pickDone").addEventListener("click", closePicker);
 $("picker").addEventListener("click", (e) => { if (e.target.id === "picker") closePicker(); });
 
+/* =========================================================
+   FACE ID / TOUCH ID (v2.7.0) — site/bio.js, docs/PRD-v2.7.0
+   Opt-in per device. Enrolled: the passcode and the full catalogue live encrypted
+   in sw_vault, and in memory only while unlocked. Not enrolled: none of this runs.
+========================================================= */
+function bioLockedHTML(text, passId, sfx) {
+  return `<div class="locked">
+      <svg class="bio-ic-lg" aria-hidden="true"><use href="#bio"/></svg>
+      <p>${text}</p>
+      <button id="bioUnlockBtn${sfx}" class="btn bio"><svg aria-hidden="true"><use href="#bio"/></svg>Unlock with Face ID / Touch ID</button>
+      <p id="bioLockErr${sfx}" class="passnote" hidden></p>
+      <button id="${passId}" class="linkbtn">Use passcode</button>
+    </div>`;
+}
+function wireBioButton(sfx) {
+  const b = $("bioUnlockBtn" + sfx);
+  if (b) b.onclick = () => bioUnlock(sfx);
+}
+
+// Runs from the tap on "Unlock with Face ID / Touch ID". RGABio.unlock() must be the
+// first thing that happens here: iOS only starts the prompt from a user gesture.
+async function bioUnlock(sfx) {
+  const B = window.RGABio;
+  if (!B || bioBusy) return;
+  bioBusy = true;
+  const msg = $("bioLockErr" + sfx);
+  if (msg) msg.hidden = true;
+  let res;
+  try {
+    res = await B.unlock();
+  } catch (err) {
+    bioBusy = false;
+    if (err.code === "cancelled") return;                       // stay locked, no banner
+    if (err.code === "decrypt-failed" || err.code === "no-vault") { bioRecover(); return; }
+    if (msg) {
+      msg.textContent = "Face ID / Touch ID isn't available right now. Use the passcode.";
+      msg.hidden = false;
+    }
+    return;
+  }
+  bioBusy = false;
+  if (!res.catalogue || !res.catalogue.brands) { bioRecover(); return; }
+  memPass = res.passcode;
+  unlocked = true;
+  const wasQuote = tab === "quote";
+  pendingQuote = false; pendingRole = null;
+  useData(res.catalogue);                                       // straight away; works offline
+  reflectTabs();
+  if (wasQuote) setTab("quote"); else setRole(role);
+  refresh();                                                    // background: fresh prices, or 401 -> recover
+}
+
+// The vault can't be used (passkey deleted, tampered, or the server passcode changed):
+// forget it and fall back to the ordinary passcode sheet with one explanatory line.
+function bioRecover() {
+  if (window.RGABio) window.RGABio.remove();
+  lockDown();
+  setRole(role);
+  reflectTabs();
+  if (tab === "quote") {
+    renderQuote();
+    pendingQuote = true;
+    openModal("quote", "Quote — internal pricing", BIO_RECOVERY_NOTE);
+  } else {
+    pendingRole = GATED.has(role) ? role : null;
+    openModal(role, undefined, BIO_RECOVERY_NOTE);
+  }
+}
+
+// Refresh the encrypted copy with the in-memory key (no prompt). Called at lock time
+// and when the page goes to the background (PRD §4.6). A no-op without a session key.
+// The data is captured now, so the caller may clear its own state straight after.
+function bioSeal() {
+  if (!window.RGABio || !unlocked || !memPass || !DATA) return;
+  window.RGABio.reseal({ passcode: memPass, catalogue: DATA }).catch(() => {});
+}
+
+// Auto-lock on an enrolled device: hidden for more than BIO_AUTOLOCK_MS. (iOS may kill
+// the page instead, and a cold start is locked anyway.)
+document.addEventListener("visibilitychange", () => {
+  if (!bioOn()) return;
+  if (document.visibilityState === "hidden") {
+    hiddenAt = Date.now();
+    bioSeal();
+  } else if (hiddenAt) {
+    const away = Date.now() - hiddenAt;
+    hiddenAt = 0;
+    if (unlocked && away > BIO_AUTOLOCK_MS) doLock();
+  }
+});
+
+/* ----- opt-in card ----- */
+const bioSnoozed = () => {
+  const t = Number(localStorage.getItem(LS.bioSnooze));
+  return t > 0 && Date.now() - t < BIO_SNOOZE_MS;
+};
+const bioBlocked = () => localStorage.getItem(LS.bioNo) === navigator.userAgent;
+
+let bioMsgTimer = 0;
+function bioMsg(text) {
+  for (const id of ["bioErr", "bioSetErr"]) {
+    const el = $(id);
+    if (el) { el.textContent = text || ""; el.hidden = !text; }
+  }
+  clearTimeout(bioMsgTimer);
+  if (text) bioMsgTimer = setTimeout(() => bioMsg(""), 8000);
+}
+function reflectBioCard() {
+  const c = $("bioCard");
+  if (c) c.hidden = !(bioCardWanted && unlocked && tab === "catalogue");
+}
+// After a passcode unlock: offer Face ID / Touch ID once, on a device that can do it.
+async function maybeOfferBio() {
+  const B = window.RGABio;
+  if (!B || !unlocked || B.enrolled() || bioSnoozed() || bioBlocked()) return;
+  if (!(await B.supported())) return;
+  if (!unlocked || B.enrolled()) return;
+  bioCardWanted = true;
+  reflectBioCard();
+}
+
+// Turn on. Must start from the tap (no awaits before B.enrol).
+async function bioEnrol() {
+  const B = window.RGABio;
+  const pass = memPass || localStorage.getItem(LS.pass);
+  if (!B || bioBusy || !unlocked || !pass || B.enrolled()) return;
+  bioBusy = true;
+  bioMsg("");
+  for (const id of ["bioOn", "bioNot", "bioToggle"]) { const b = $(id); if (b) b.disabled = true; }
+  try {
+    await B.enrol({ passcode: pass, catalogue: loadCache(LS.dataFull) || DATA });
+  } catch (err) {
+    if (err.code === "no-prf" || err.code === "unsupported") {
+      localStorage.setItem(LS.bioNo, navigator.userAgent);      // hide the option here from now on
+      bioCardWanted = false;
+      bioMsg("This device can't do it.");
+    } else if (err.code === "storage-full") {
+      bioMsg("Not enough free storage on this device. Face ID / Touch ID was not turned on.");
+    } else if (err.code !== "cancelled") {
+      bioMsg("Couldn't turn on Face ID / Touch ID. Nothing was changed.");
+    }
+    return;
+  } finally {
+    bioBusy = false;
+    for (const id of ["bioOn", "bioNot", "bioToggle"]) { const b = $(id); if (b) b.disabled = false; }
+    reflectBioCard();
+    refreshBioSettings();
+  }
+  // Vault verified. Only now are the readable copies removed; from here the passcode
+  // lives in memory and the catalogue in the vault.
+  memPass = pass;
+  for (const k of ["unlocked", "pass", "dataFull"]) localStorage.removeItem(LS[k]);
+  bioCardWanted = false;
+  bioMsg("");
+  reflectBioCard();
+  refreshBioSettings();
+}
+
+/* ----- Settings section ----- */
+async function refreshBioSettings() {
+  const box = $("bioSettings"), B = window.RGABio;
+  if (!box) return;
+  if (!B) { box.hidden = true; return; }
+  const on = B.enrolled();
+  const show = on || (!bioBlocked() && await B.supported());
+  box.hidden = !show;
+  if (!show) return;
+  const mins = Math.round(BIO_AUTOLOCK_MS / 60000);
+  $("bioStateTxt").textContent = on ? "On for this device" : "Not set up";
+  $("bioStateSub").textContent = on ? `Locks after ${mins} min in the background`
+    : unlocked ? "You'll be asked to confirm twice the first time"
+    : "Unlock with the passcode first";
+  const t = $("bioToggle");
+  t.textContent = on ? "Turn off" : "Turn on";
+  t.disabled = !on && !unlocked;
+}
+function bioToggle() {
+  const B = window.RGABio;
+  if (!B) return;
+  if (B.enrolled()) {
+    B.remove();                                  // deletes the vault and the session key
+    if (unlocked) doLock();                      // the readable copy exists only in memory: lock
+    bioMsg("");
+    refreshBioSettings();
+  } else {
+    bioEnrol();
+  }
+}
+{
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+  on("bioOn", bioEnrol);
+  on("bioNot", () => {
+    localStorage.setItem(LS.bioSnooze, String(Date.now()));
+    bioCardWanted = false;
+    bioMsg("");
+    reflectBioCard();
+  });
+  on("bioToggle", bioToggle);
+}
+
 /* ========================================================= */
 
 /* ---------- boot ---------- */
@@ -1039,14 +1278,17 @@ function showUpdated() {
 
 async function refresh() {
   if (unlocked) {
+    const pass = memPass || localStorage.getItem(LS.pass);   // enrolled: memory only
     try {
-      const full = await fetchFull(localStorage.getItem(LS.pass));
-      saveCache(LS.dataFull, full);
+      const full = await fetchFull(pass);
+      if (memPass && memPass !== pass) return;   // enrolled device was locked while this was in flight
+      if (!memPass) saveCache(LS.dataFull, full);   // enrolled: nothing readable is written
       useData(full);
       return;
     } catch (err) {
-      if (err.status === 401) lockDown();       // passcode was changed: back to public
-      else if (DATA) return;                     // offline: keep the saved full copy
+      if (err.status === 401) {                  // passcode was changed: back to public
+        if (memPass) bioRecover(); else lockDown();
+      } else if (DATA) return;                   // offline: keep the saved full copy
     }
   }
   try {

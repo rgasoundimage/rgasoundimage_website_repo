@@ -42,6 +42,26 @@ the site, and the app shows the changes about 1–2 minutes later. The screen te
 you when there are unpublished changes. Labels,
 roles and which lists exist are configured in `netlify/lib/catalog.mjs`.
 
+## Face ID / Touch ID unlock (v2.7.0)
+
+Opt-in per device, on iOS / macOS 18+. After a passcode unlock the app offers to turn it on
+(or Settings → Face ID / Touch ID). Turned on, the passcode and the full catalogue are kept
+**encrypted** in `localStorage` (`sw_vault`) under a key that only exists after Face ID / Touch ID
+succeeds (a WebAuthn passkey's PRF secret, `site/bio.js`). Locked, the phone holds only ciphertext;
+unlocking is one tap and works offline. The server passcode (`PRICE_PASSCODE`) is unchanged and
+still checked on every online unlock: change it and enrolled devices fall back to the passcode
+sheet automatically.
+
+- Auto-lock: on a cold start, and after 5 minutes in the background (`BIO_AUTOLOCK_MS` in `app.js`).
+- The encrypted copy is refreshed when the app locks (Lock, auto-lock, going to the background).
+- Each device enrols separately; the Home Screen app and a Safari tab have separate storage.
+  Each enrolment adds one passkey to iOS Passwords. Devices without PRF never see the option.
+- A device that hasn't turned it on behaves exactly as before.
+- If you add a file the app loads, add it to `ASSETS` in `site/sw.js` or it breaks offline only
+  (`bio.js` is listed there).
+- Details: `docs/PRD-v2.7.0-biometric-unlock.md`. The on-iPhone checks that automated tests can't
+  do are in `docs/HANDOFF-v2.7.0-biometric-unlock.md` §5.
+
 ## Netlify environment variables (site `rgapricelist`)
 
 - `SUPABASE_URL`

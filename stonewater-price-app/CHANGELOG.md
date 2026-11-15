@@ -6,6 +6,66 @@ build that's live on Netlify. Versions loosely follow semantic versioning.
 
 ---
 
+## [2.7.0] - Face ID / Touch ID unlock - 2026-11-15 · cache `stonewater-<commitSHA>`
+Minor. A new, opt-in way to lock the app cheaply and unlock it with one glance, including offline.
+A device that doesn't turn it on behaves exactly as in 2.6.2.
+
+### Added
+- **Face ID / Touch ID unlock.** After a passcode unlock, a supported iPhone or Mac offers *Turn
+  on* (or *Not now*, which hides the card for 30 days; Settings keeps the option). Turned on, the
+  passcode and the full catalogue (dealer and distributor prices) are stored **encrypted**, not
+  merely hidden. The key comes from a passkey's WebAuthn PRF secret, which only exists after Face
+  ID / Touch ID succeeds. Locked, the phone holds only ciphertext.
+- **Locked screens** (a locked view, and the Quote tab) get **Unlock with Face ID / Touch ID**
+  and a quiet **Use passcode** link. Cancelling the prompt just leaves the screen as it was.
+- **Offline unlock.** The catalogue is inside the encrypted copy, so a glance unlocks the app with
+  no signal. The server is asked again in the background and a failure changes nothing.
+- **Auto-lock** on an enrolled device: a cold start is locked, and so is returning after the app
+  has been in the background for more than 5 minutes (`BIO_AUTOLOCK_MS` in `app.js`).
+- **Settings → Face ID / Touch ID**: shows *On for this device* with **Turn off** (deletes the
+  encrypted copy and locks), or *Not set up* with **Turn on**. Absent on devices that can't do it.
+- `site/bio.js` (new, loaded before `app.js`, listed in the service worker's `ASSETS`).
+  No new dependencies; all crypto is the browser's WebCrypto.
+
+### Changed
+- On an enrolled device the passcode is held **in memory only** while unlocked, and
+  `sw_pass` / `sw_data_full` / `sw_unlocked` are no longer written. Any copies left from an older
+  version are deleted at start-up. Locking keeps the encrypted copy and removes everything readable.
+- **The encrypted copy is refreshed at lock time**, not on every price refresh: on Lock,
+  auto-lock, and when the page goes to the background, using a non-extractable key held in memory
+  for that session (no prompt). If the page is killed first, or the session was unlocked with the
+  passcode, the copy stays as it was; an offline unlock then shows older prices, and the footer's
+  "Updated" date says how old.
+- On an enrolled device, picking a locked view or the Quote tab shows the locked screen instead
+  of opening the passcode sheet at once (iOS only starts Face ID from a tap).
+
+### Fixed / recovers by itself
+- **Passkey deleted, or the vault can't be opened:** the encrypted copy is removed and the normal
+  passcode sheet opens with one line, "Face ID / Touch ID needs setting up again."
+- **`PRICE_PASSCODE` changed on the server:** the next online unlock gets a 401, the encrypted
+  copy is removed and the passcode sheet opens with the same line.
+
+### Known limits
+- Anyone who knows the iPhone's own passcode can pass Face ID; that is true of every biometric on iOS.
+- Each device enrols separately. The Home Screen app and the Safari tab have **separate storage**:
+  turn it on in the one you use.
+- Each enrolment leaves one passkey ("RGA Prices – <device> <date>") in iOS Passwords; delete old
+  ones there. The app uses a fresh random user ID each time so one device can't overwrite another's.
+- Needs iOS / macOS 18+ (WebAuthn PRF). Elsewhere the option is never shown. It never falls back
+  to a prompt in front of plain-text storage, which would protect nothing.
+- This protects the data **on the device**. The shared server passcode is still the gate, and
+  the Customer view needs nothing and is unchanged.
+
+### Tests
+- New `tests/biometric-vault.test.mjs` (181 assertions): vault round trip, wrong key, tampered
+  ciphertext and IV, unknown version, quota, cancel, no-PRF, reseal with and without a key; the app
+  wiring (cold start locked, lock keeps the vault, offline unlock, 401 and decrypt-failure recovery,
+  auto-lock, Settings, snooze); and that a device without it follows the 2.6.2 paths. The
+  authenticator is a stub, so this proves the logic, not iOS behaviour. The existing 152 + 53
+  assertions are untouched.
+
+---
+
 ## [2.6.2] - Stonewater MSRP is the price you type - 2026-10-07 · cache `stonewater-<commitSHA>`
 Patch. Admin screen and database only; the app is unchanged.
 
